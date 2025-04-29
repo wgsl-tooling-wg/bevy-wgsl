@@ -1,18 +1,14 @@
-[workspace]
-members = ["examples/consumer"]
-resolver = "3"
-
 [package]
-name = "bevy-wgsl"
-description = "Bevy WESL shaders"
+name = "consumer"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+bevy-wgsl = { version = "0.1.0", path = "../.." }
 wesl = "0.1.2"
 
 [build-dependencies]
 wesl = { version = "0.1.2", features = ["package"] }
 
 [patch.crates-io]
-wesl = { path = "../wesl-rs/crates/wesl" }
+wesl = { path = "../../../wesl-rs/crates/wesl"}
