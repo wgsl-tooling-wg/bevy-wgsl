@@ -1,6 +1,4 @@
-
-
-import bevy::render::view::View;;
+import bevy::render::view::View;
 
 import bevy::pbr::{
     mesh_view_types::Lights,

@@ -1,7 +1,5 @@
 // A postprocessing pass that performs screen-space reflections.
 
-
-
 import bevy::core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput;
 import bevy::pbr::{
     clustered_forward,
@@ -33,7 +31,6 @@ import bevy::render::view::View;
 
 @if(ENVIRONMENT_MAP)
 import bevy::pbr::environment_map;
-// #endif
 
 // The texture representing the color framebuffer.
 @group(1) @binding(0) var color_texture: texture_2d<f32>;
@@ -119,75 +116,80 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     // the ray missed. Otherwise, it only takes the diffuse part.
     //
     // TODO: Merge this with the duplicated code in `apply_pbr_lighting`.
-@if(ENVIRONMENT_MAP)
-    // Unpack values required for environment mapping.
-    let base_color = pbr_input.material.base_color.rgb;
-    let metallic = pbr_input.material.metallic;
-    let reflectance = pbr_input.material.reflectance;
-    let specular_transmission = pbr_input.material.specular_transmission;
-    let diffuse_transmission = pbr_input.material.diffuse_transmission;
-    let diffuse_occlusion = pbr_input.diffuse_occlusion;
+    @if(ENVIRONMENT_MAP) {
+        // Unpack values required for environment mapping.
+        let base_color = pbr_input.material.base_color.rgb;
+        let metallic = pbr_input.material.metallic;
+        let reflectance = pbr_input.material.reflectance;
+        let specular_transmission = pbr_input.material.specular_transmission;
+        let diffuse_transmission = pbr_input.material.diffuse_transmission;
+        let diffuse_occlusion = pbr_input.diffuse_occlusion;
 
-@if(STANDARD_MATERIAL_CLEARCOAT)
-    // Do the above calculations again for the clearcoat layer. Remember that
-    // the clearcoat can have its own roughness and its own normal.
-    let clearcoat = pbr_input.material.clearcoat;
-    let clearcoat_perceptual_roughness = pbr_input.material.clearcoat_perceptual_roughness;
-    let clearcoat_roughness = lighting::perceptualRoughnessToRoughness(clearcoat_perceptual_roughness);
-    let clearcoat_N = pbr_input.clearcoat_N;
-    let clearcoat_NdotV = max(dot(clearcoat_N, pbr_input.V), 0.0001);
-    let clearcoat_R = reflect(-pbr_input.V, clearcoat_N);
-// #endif  // STANDARD_MATERIAL_CLEARCOAT
+        // Do the above calculations again for the clearcoat layer. Remember that
+        // the clearcoat can have its own roughness and its own normal.
+        // TODO(mbr): this is not ideal
+        @if(STANDARD_MATERIAL_CLEARCOAT)
+        let clearcoat = pbr_input.material.clearcoat;
+        @if(STANDARD_MATERIAL_CLEARCOAT)
+        let clearcoat_perceptual_roughness = pbr_input.material.clearcoat_perceptual_roughness;
+        @if(STANDARD_MATERIAL_CLEARCOAT)
+        let clearcoat_roughness = lighting::perceptualRoughnessToRoughness(clearcoat_perceptual_roughness);
+        @if(STANDARD_MATERIAL_CLEARCOAT)
+        let clearcoat_N = pbr_input.clearcoat_N;
+        @if(STANDARD_MATERIAL_CLEARCOAT)
+        let clearcoat_NdotV = max(dot(clearcoat_N, pbr_input.V), 0.0001);
+        @if(STANDARD_MATERIAL_CLEARCOAT)
+        let clearcoat_R = reflect(-pbr_input.V, clearcoat_N);
 
-    // Calculate various other values needed for environment mapping.
-    let roughness = lighting::perceptualRoughnessToRoughness(perceptual_roughness);
-    let diffuse_color = pbr_functions::calculate_diffuse_color(
-        base_color,
-        metallic,
-        specular_transmission,
-        diffuse_transmission
-    );
-    let NdotV = max(dot(N, V), 0.0001);
-    let F_ab = lighting::F_AB(perceptual_roughness, NdotV);
-    let F0 = pbr_functions::calculate_F0(base_color, metallic, reflectance);
+        // Calculate various other values needed for environment mapping.
+        let roughness = lighting::perceptualRoughnessToRoughness(perceptual_roughness);
+        let diffuse_color = pbr_functions::calculate_diffuse_color(
+            base_color,
+            metallic,
+            specular_transmission,
+            diffuse_transmission
+        );
+        let NdotV = max(dot(N, V), 0.0001);
+        let F_ab = lighting::F_AB(perceptual_roughness, NdotV);
+        let F0 = pbr_functions::calculate_F0(base_color, metallic, reflectance);
 
-    // Pack all the values into a structure.
-    var lighting_input: lighting::LightingInput;
-    lighting_input.layers[LAYER_BASE].NdotV = NdotV;
-    lighting_input.layers[LAYER_BASE].N = N;
-    lighting_input.layers[LAYER_BASE].R = R;
-    lighting_input.layers[LAYER_BASE].perceptual_roughness = perceptual_roughness;
-    lighting_input.layers[LAYER_BASE].roughness = roughness;
-    lighting_input.P = world_position.xyz;
-    lighting_input.V = V;
-    lighting_input.diffuse_color = diffuse_color;
-    lighting_input.F0_ = F0;
-    lighting_input.F_ab = F_ab;
-@if(STANDARD_MATERIAL_CLEARCOAT)
-    lighting_input.layers[LAYER_CLEARCOAT].NdotV = clearcoat_NdotV;
-    lighting_input.layers[LAYER_CLEARCOAT].N = clearcoat_N;
-    lighting_input.layers[LAYER_CLEARCOAT].R = clearcoat_R;
-    lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = clearcoat_perceptual_roughness;
-    lighting_input.layers[LAYER_CLEARCOAT].roughness = clearcoat_roughness;
-    lighting_input.clearcoat_strength = clearcoat;
-// #endif  // STANDARD_MATERIAL_CLEARCOAT
+        // Pack all the values into a structure.
+        var lighting_input: lighting::LightingInput;
+        lighting_input.layers[LAYER_BASE].NdotV = NdotV;
+        lighting_input.layers[LAYER_BASE].N = N;
+        lighting_input.layers[LAYER_BASE].R = R;
+        lighting_input.layers[LAYER_BASE].perceptual_roughness = perceptual_roughness;
+        lighting_input.layers[LAYER_BASE].roughness = roughness;
+        lighting_input.P = world_position.xyz;
+        lighting_input.V = V;
+        lighting_input.diffuse_color = diffuse_color;
+        lighting_input.F0_ = F0;
+        lighting_input.F_ab = F_ab;
+        @if(STANDARD_MATERIAL_CLEARCOAT) {
+            lighting_input.layers[LAYER_CLEARCOAT].NdotV = clearcoat_NdotV;
+            lighting_input.layers[LAYER_CLEARCOAT].N = clearcoat_N;
+            lighting_input.layers[LAYER_CLEARCOAT].R = clearcoat_R;
+            lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = clearcoat_perceptual_roughness;
+            lighting_input.layers[LAYER_CLEARCOAT].roughness = clearcoat_roughness;
+            lighting_input.clearcoat_strength = clearcoat;
+        }
 
-    // Determine which cluster we're in. We'll need this to find the right
-    // reflection probe.
-    let cluster_index = clustered_forward::fragment_cluster_index(
-        frag_coord.xy, frag_coord.z, false);
-    var clusterable_object_index_ranges =
-        clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
+        // Determine which cluster we're in. We'll need this to find the right
+        // reflection probe.
+        let cluster_index = clustered_forward::fragment_cluster_index(
+            frag_coord.xy, frag_coord.z, false);
+        var clusterable_object_index_ranges =
+            clustered_forward::unpack_clusterable_object_index_ranges(cluster_index);
 
-    // Sample the environment map.
-    let environment_light = environment_map::environment_map_light(
-        &lighting_input, &clusterable_object_index_ranges, false);
+        // Sample the environment map.
+        let environment_light = environment_map::environment_map_light(
+            &lighting_input, &clusterable_object_index_ranges, false);
 
-    // Accumulate the environment map light.
-    indirect_light += view.exposure *
-        (environment_light.diffuse * diffuse_occlusion +
-        environment_light.specular * specular_occlusion);
-// #endif
+        // Accumulate the environment map light.
+        indirect_light += view.exposure *
+            (environment_light.diffuse * diffuse_occlusion +
+            environment_light.specular * specular_occlusion);
+    }
 
     // Write the results.
     return vec4(fragment.rgb + indirect_light, 1.0);

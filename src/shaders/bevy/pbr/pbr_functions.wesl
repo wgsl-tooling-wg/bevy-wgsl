@@ -1,5 +1,3 @@
-
-
 import bevy::pbr::{
     pbr_types,
     pbr_bindings,
@@ -20,28 +18,25 @@ import bevy::render::maths::{E, powsafe};
 import bevy::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
 @elif(PREPASS_PIPELINE)
 import bevy::pbr::prepass_io::VertexOutput;
-@else // #else   // PREPASS_PIPELINE
+@else 
 import bevy::pbr::forward_io::VertexOutput;
-// #endif  // PREPASS_PIPELINE
 
 @if(ENVIRONMENT_MAP)
 import bevy::pbr::environment_map;
-// #endif
 
 @if(TONEMAP_IN_SHADER)
 import bevy::core_pipeline::tonemapping::{tone_mapping, screen_space_dither};
-// #endif
 
 
 // Biasing info needed to sample from a texture. How this is done depends on
 // whether we're rendering meshlets or regular meshes.
 struct SampleBias {
-@if(MESHLET_MESH_MATERIAL_PASS)
+    @if(MESHLET_MESH_MATERIAL_PASS)
     ddx_uv: vec2<f32>,
+    @if(MESHLET_MESH_MATERIAL_PASS)
     ddy_uv: vec2<f32>,
-@else // #else   // MESHLET_MESH_MATERIAL_PASS
+    @else
     mip_bias: f32,
-// #endif  // MESHLET_MESH_MATERIAL_PASS
 }
 
 // This is the standard 4x4 ordered dithering pattern from [1].
@@ -91,7 +86,6 @@ fn visibility_range_dither(frag_coord: vec4<f32>, dither: i32) {
         discard;
     }
 }
-// #endif
 
 fn alpha_discard(material: pbr_types::StandardMaterial, output_color: vec4<f32>) -> vec4<f32> {
     var color = output_color;
@@ -101,21 +95,22 @@ fn alpha_discard(material: pbr_types::StandardMaterial, output_color: vec4<f32>)
         color.a = 1.0;
     }
 
-@if(MAY_DISCARD)
-    // NOTE: `MAY_DISCARD` is only defined in the alpha to coverage case if MSAA
-    // was off. This special situation causes alpha to coverage to fall back to
-    // alpha mask.
-    else if alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_MASK ||
-            alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_ALPHA_TO_COVERAGE {
-        if color.a >= material.alpha_cutoff {
-            // NOTE: If rendering as masked alpha and >= the cutoff, render as fully opaque
-            color.a = 1.0;
-        } else {
-            // NOTE: output_color.a < in.material.alpha_cutoff should not be rendered
-            discard;
+    else {
+        // NOTE: `MAY_DISCARD` is only defined in the alpha to coverage case if MSAA
+        // was off. This special situation causes alpha to coverage to fall back to
+        // alpha mask.
+        @if(MAY_DISCARD)
+        if alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_MASK ||
+                alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_ALPHA_TO_COVERAGE {
+            if color.a >= material.alpha_cutoff {
+                // NOTE: If rendering as masked alpha and >= the cutoff, render as fully opaque
+                color.a = 1.0;
+            } else {
+                // NOTE: output_color.a < in.material.alpha_cutoff should not be rendered
+                discard;
+            }
         }
     }
-// #endif
 
     return color;
 }
@@ -126,13 +121,11 @@ fn prepare_world_normal(
     is_front: bool,
 ) -> vec3<f32> {
     var output: vec3<f32> = world_normal;
-@if(!VERTEX_TANGENTS)
-@if(!STANDARD_MATERIAL_NORMAL_MAP)
-    // NOTE: When NOT using normal-mapping, if looking at the back face of a double-sided
-    // material, the normal needs to be inverted. This is a branchless version of that.
-    output = (f32(!double_sided || is_front) * 2.0 - 1.0) * output;
-// #endif
-// #endif
+    @if(!VERTEX_TANGENTS && !STANDARD_MATERIAL_NORMAL_MAP) {
+        // NOTE: When NOT using normal-mapping, if looking at the back face of a double-sided
+        // material, the normal needs to be inverted. This is a branchless version of that.
+        output = (f32(!double_sided || is_front) * 2.0 - 1.0) * output;
+    }
     return output;
 }
 
@@ -156,13 +149,13 @@ fn calculate_tbn_mikktspace(world_normal: vec3<f32>, world_tangent: vec4<f32>) -
     var T: vec3<f32> = world_tangent.xyz;
     var B: vec3<f32> = world_tangent.w * cross(N, T);
 
-@if(MESHLET_MESH_MATERIAL_PASS)
-    // https://www.jeremyong.com/graphics/2023/12/16/surface-gradient-bump-mapping/#a-note-on-mikktspace-usage
-    let inverse_length_n = 1.0 / length(N);
-    T *= inverse_length_n;
-    B *= inverse_length_n;
-    N *= inverse_length_n;
-// #endif
+    @if(MESHLET_MESH_MATERIAL_PASS) {
+        // https://www.jeremyong.com/graphics/2023/12/16/surface-gradient-bump-mapping/#a-note-on-mikktspace-usage
+        let inverse_length_n = 1.0 / length(N);
+        T *= inverse_length_n;
+        B *= inverse_length_n;
+        N *= inverse_length_n;
+    }
 
     return mat3x3(T, B, N);
 }
@@ -207,13 +200,12 @@ fn apply_normal_mapping(
     return normalize(N);
 }
 
-@if(STANDARD_MATERIAL_ANISOTROPY)
-
 // Modifies the normal to achieve a better approximate direction from the
 // environment map when using anisotropy.
 //
 // This follows the suggested implementation in the `KHR_materials_anisotropy` specification:
 // https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_anisotropy/README.md#image-based-lighting
+@if(STANDARD_MATERIAL_ANISOTROPY)
 fn bend_normal_for_anisotropy(lighting_input: ptr<function, lighting::LightingInput>) {
     // Unpack.
     let N = (*lighting_input).layers[LAYER_BASE].N;
@@ -240,8 +232,6 @@ fn bend_normal_for_anisotropy(lighting_input: ptr<function, lighting::LightingIn
     (*lighting_input).layers[LAYER_BASE].N = bent_normal;
     (*lighting_input).layers[LAYER_BASE].R = R;
 }
-
-// #endif  // STANDARD_MATERIAL_ANISOTROPY
 
 // NOTE: Correctly calculates the view vector depending on whether
 // the projection is orthographic or perspective.
@@ -304,16 +294,21 @@ fn apply_pbr_lighting(
     let NdotV = max(dot(in.N, in.V), 0.0001);
     let R = reflect(-in.V, in.N);
 
-@if(STANDARD_MATERIAL_CLEARCOAT)
     // Do the above calculations again for the clearcoat layer. Remember that
     // the clearcoat can have its own roughness and its own normal.
+    // TODO(mbr): this is not ideal
+    @if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat = in.material.clearcoat;
+    @if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat_perceptual_roughness = in.material.clearcoat_perceptual_roughness;
+    @if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat_roughness = lighting::perceptualRoughnessToRoughness(clearcoat_perceptual_roughness);
+    @if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat_N = in.clearcoat_N;
+    @if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat_NdotV = max(dot(clearcoat_N, in.V), 0.0001);
+    @if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat_R = reflect(-in.V, clearcoat_N);
-// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     let diffuse_color = calculate_diffuse_color(
         output_color.rgb,
@@ -348,47 +343,49 @@ fn apply_pbr_lighting(
     lighting_input.diffuse_color = diffuse_color;
     lighting_input.F0_ = F0;
     lighting_input.F_ab = F_ab;
-@if(STANDARD_MATERIAL_CLEARCOAT)
-    lighting_input.layers[LAYER_CLEARCOAT].NdotV = clearcoat_NdotV;
-    lighting_input.layers[LAYER_CLEARCOAT].N = clearcoat_N;
-    lighting_input.layers[LAYER_CLEARCOAT].R = clearcoat_R;
-    lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = clearcoat_perceptual_roughness;
-    lighting_input.layers[LAYER_CLEARCOAT].roughness = clearcoat_roughness;
-    lighting_input.clearcoat_strength = clearcoat;
-// #endif  // STANDARD_MATERIAL_CLEARCOAT
-@if(STANDARD_MATERIAL_ANISOTROPY)
-    lighting_input.anisotropy = in.anisotropy_strength;
-    lighting_input.Ta = in.anisotropy_T;
-    lighting_input.Ba = in.anisotropy_B;
-// #endif  // STANDARD_MATERIAL_ANISOTROPY
+    @if(STANDARD_MATERIAL_CLEARCOAT) {
+        lighting_input.layers[LAYER_CLEARCOAT].NdotV = clearcoat_NdotV;
+        lighting_input.layers[LAYER_CLEARCOAT].N = clearcoat_N;
+        lighting_input.layers[LAYER_CLEARCOAT].R = clearcoat_R;
+        lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = clearcoat_perceptual_roughness;
+        lighting_input.layers[LAYER_CLEARCOAT].roughness = clearcoat_roughness;
+        lighting_input.clearcoat_strength = clearcoat;
+    }
+    @if(STANDARD_MATERIAL_ANISOTROPY) {
+        lighting_input.anisotropy = in.anisotropy_strength;
+        lighting_input.Ta = in.anisotropy_T;
+        lighting_input.Ba = in.anisotropy_B;
+    }
 
     // And do the same for transmissive if we need to.
-@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
+    @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
     var transmissive_lighting_input: lighting::LightingInput;
-    transmissive_lighting_input.layers[LAYER_BASE].NdotV = 1.0;
-    transmissive_lighting_input.layers[LAYER_BASE].N = -in.N;
-    transmissive_lighting_input.layers[LAYER_BASE].R = vec3(0.0);
-    transmissive_lighting_input.layers[LAYER_BASE].perceptual_roughness = 1.0;
-    transmissive_lighting_input.layers[LAYER_BASE].roughness = 1.0;
-    transmissive_lighting_input.P = diffuse_transmissive_lobe_world_position.xyz;
-    transmissive_lighting_input.V = -in.V;
-    transmissive_lighting_input.diffuse_color = diffuse_transmissive_color;
-    transmissive_lighting_input.F0_ = vec3(0.0);
-    transmissive_lighting_input.F_ab = vec2(0.1);
-@if(STANDARD_MATERIAL_CLEARCOAT)
-    transmissive_lighting_input.layers[LAYER_CLEARCOAT].NdotV = 0.0;
-    transmissive_lighting_input.layers[LAYER_CLEARCOAT].N = vec3(0.0);
-    transmissive_lighting_input.layers[LAYER_CLEARCOAT].R = vec3(0.0);
-    transmissive_lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = 0.0;
-    transmissive_lighting_input.layers[LAYER_CLEARCOAT].roughness = 0.0;
-    transmissive_lighting_input.clearcoat_strength = 0.0;
-// #endif  // STANDARD_MATERIAL_CLEARCOAT
-@if(STANDARD_MATERIAL_ANISOTROPY)
-    transmissive_lighting_input.anisotropy = in.anisotropy_strength;
-    transmissive_lighting_input.Ta = in.anisotropy_T;
-    transmissive_lighting_input.Ba = in.anisotropy_B;
-// #endif  // STANDARD_MATERIAL_ANISOTROPY
-// #endif  // STANDARD_MATERIAL_DIFFUSE_TRANSMISSION
+    @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+        transmissive_lighting_input.layers[LAYER_BASE].NdotV = 1.0;
+        transmissive_lighting_input.layers[LAYER_BASE].N = -in.N;
+        transmissive_lighting_input.layers[LAYER_BASE].R = vec3(0.0);
+        transmissive_lighting_input.layers[LAYER_BASE].perceptual_roughness = 1.0;
+        transmissive_lighting_input.layers[LAYER_BASE].roughness = 1.0;
+        transmissive_lighting_input.P = diffuse_transmissive_lobe_world_position.xyz;
+        transmissive_lighting_input.V = -in.V;
+        transmissive_lighting_input.diffuse_color = diffuse_transmissive_color;
+        transmissive_lighting_input.F0_ = vec3(0.0);
+        transmissive_lighting_input.F_ab = vec2(0.1);
+        
+        @if(STANDARD_MATERIAL_CLEARCOAT) {
+            transmissive_lighting_input.layers[LAYER_CLEARCOAT].NdotV = 0.0;
+            transmissive_lighting_input.layers[LAYER_CLEARCOAT].N = vec3(0.0);
+            transmissive_lighting_input.layers[LAYER_CLEARCOAT].R = vec3(0.0);
+            transmissive_lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = 0.0;
+            transmissive_lighting_input.layers[LAYER_CLEARCOAT].roughness = 0.0;
+            transmissive_lighting_input.clearcoat_strength = 0.0;
+        }
+        @if(STANDARD_MATERIAL_ANISOTROPY) {
+            transmissive_lighting_input.anisotropy = in.anisotropy_strength;
+            transmissive_lighting_input.Ta = in.anisotropy_T;
+            transmissive_lighting_input.Ba = in.anisotropy_B;
+        }
+    }
 
     let view_z = dot(vec4<f32>(
         view_bindings::view.view_from_world[0].z,
@@ -408,13 +405,12 @@ fn apply_pbr_lighting(
 
         // If we're lightmapped, disable diffuse contribution from the light if
         // requested, to avoid double-counting light.
-@if(LIGHTMAP)
+        @if(LIGHTMAP)
         let enable_diffuse =
             (view_bindings::clusterable_objects.data[light_id].flags &
                 mesh_view_types::POINT_LIGHT_FLAGS_AFFECTS_LIGHTMAPPED_MESH_DIFFUSE_BIT) != 0u;
-@else // #else   // LIGHTMAP
+        @else
         let enable_diffuse = true;
-// #endif  // LIGHTMAP
 
         var shadow: f32 = 1.0;
         if ((in.flags & MESH_FLAGS_SHADOW_RECEIVER_BIT) != 0u
@@ -425,26 +421,26 @@ fn apply_pbr_lighting(
         let light_contrib = lighting::point_light(light_id, &lighting_input, enable_diffuse);
         direct_light += light_contrib * shadow;
 
-@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
-        // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
-        // world position, inverted normal and view vectors, and the following simplified
-        // values for a fully diffuse transmitted light contribution approximation:
-        //
-        // roughness = 1.0;
-        // NdotV = 1.0;
-        // R = vec3<f32>(0.0) // doesn't really matter
-        // F_ab = vec2<f32>(0.1)
-        // F0 = vec3<f32>(0.0)
-        var transmitted_shadow: f32 = 1.0;
-        if ((in.flags & (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)) == (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)
-                && (view_bindings::clusterable_objects.data[light_id].flags & mesh_view_types::POINT_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) != 0u) {
-            transmitted_shadow = shadows::fetch_point_shadow(light_id, diffuse_transmissive_lobe_world_position, -in.world_normal);
-        }
+        @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+            // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
+            // world position, inverted normal and view vectors, and the following simplified
+            // values for a fully diffuse transmitted light contribution approximation:
+            //
+            // roughness = 1.0;
+            // NdotV = 1.0;
+            // R = vec3<f32>(0.0) // doesn't really matter
+            // F_ab = vec2<f32>(0.1)
+            // F0 = vec3<f32>(0.0)
+            var transmitted_shadow: f32 = 1.0;
+            if ((in.flags & (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)) == (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)
+                    && (view_bindings::clusterable_objects.data[light_id].flags & mesh_view_types::POINT_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) != 0u) {
+                transmitted_shadow = shadows::fetch_point_shadow(light_id, diffuse_transmissive_lobe_world_position, -in.world_normal);
+            }
 
-        let transmitted_light_contrib =
-            lighting::point_light(light_id, &transmissive_lighting_input, enable_diffuse);
-        transmitted_light += transmitted_light_contrib * transmitted_shadow;
-// #endif
+            let transmitted_light_contrib =
+                lighting::point_light(light_id, &transmissive_lighting_input, enable_diffuse);
+            transmitted_light += transmitted_light_contrib * transmitted_shadow;
+        }
     }
 
     // Spot lights (direct)
@@ -455,13 +451,12 @@ fn apply_pbr_lighting(
 
         // If we're lightmapped, disable diffuse contribution from the light if
         // requested, to avoid double-counting light.
-@if(LIGHTMAP)
+        @if(LIGHTMAP)
         let enable_diffuse =
             (view_bindings::clusterable_objects.data[light_id].flags &
                 mesh_view_types::POINT_LIGHT_FLAGS_AFFECTS_LIGHTMAPPED_MESH_DIFFUSE_BIT) != 0u;
-@else // #else   // LIGHTMAP
+        @else
         let enable_diffuse = true;
-// #endif  // LIGHTMAP
 
         var shadow: f32 = 1.0;
         if ((in.flags & MESH_FLAGS_SHADOW_RECEIVER_BIT) != 0u
@@ -478,31 +473,31 @@ fn apply_pbr_lighting(
         let light_contrib = lighting::spot_light(light_id, &lighting_input, enable_diffuse);
         direct_light += light_contrib * shadow;
 
-@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
-        // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
-        // world position, inverted normal and view vectors, and the following simplified
-        // values for a fully diffuse transmitted light contribution approximation:
-        //
-        // roughness = 1.0;
-        // NdotV = 1.0;
-        // R = vec3<f32>(0.0) // doesn't really matter
-        // F_ab = vec2<f32>(0.1)
-        // F0 = vec3<f32>(0.0)
-        var transmitted_shadow: f32 = 1.0;
-        if ((in.flags & (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)) == (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)
-                && (view_bindings::clusterable_objects.data[light_id].flags & mesh_view_types::POINT_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) != 0u) {
-            transmitted_shadow = shadows::fetch_spot_shadow(
-                light_id,
-                diffuse_transmissive_lobe_world_position,
-                -in.world_normal,
-                view_bindings::clusterable_objects.data[light_id].shadow_map_near_z,
-            );
-        }
+        @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+            // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
+            // world position, inverted normal and view vectors, and the following simplified
+            // values for a fully diffuse transmitted light contribution approximation:
+            //
+            // roughness = 1.0;
+            // NdotV = 1.0;
+            // R = vec3<f32>(0.0) // doesn't really matter
+            // F_ab = vec2<f32>(0.1)
+            // F0 = vec3<f32>(0.0)
+            var transmitted_shadow: f32 = 1.0;
+            if ((in.flags & (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)) == (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)
+                    && (view_bindings::clusterable_objects.data[light_id].flags & mesh_view_types::POINT_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) != 0u) {
+                transmitted_shadow = shadows::fetch_spot_shadow(
+                    light_id,
+                    diffuse_transmissive_lobe_world_position,
+                    -in.world_normal,
+                    view_bindings::clusterable_objects.data[light_id].shadow_map_near_z,
+                );
+            }
 
-        let transmitted_light_contrib =
-            lighting::spot_light(light_id, &transmissive_lighting_input, enable_diffuse);
-        transmitted_light += transmitted_light_contrib * transmitted_shadow;
-// #endif
+            let transmitted_light_contrib =
+                lighting::spot_light(light_id, &transmissive_lighting_input, enable_diffuse);
+            transmitted_light += transmitted_light_contrib * transmitted_shadow;
+        }
     }
 
     // directional lights (direct)
@@ -517,14 +512,13 @@ fn apply_pbr_lighting(
 
         // If we're lightmapped, disable diffuse contribution from the light if
         // requested, to avoid double-counting light.
-@if(LIGHTMAP)
+        @if(LIGHTMAP)
         let enable_diffuse =
             ((*light).flags &
                 mesh_view_types::DIRECTIONAL_LIGHT_FLAGS_AFFECTS_LIGHTMAPPED_MESH_DIFFUSE_BIT) !=
                 0u;
-@else // #else   // LIGHTMAP
+        @else
         let enable_diffuse = true;
-// #endif  // LIGHTMAP
 
         var shadow: f32 = 1.0;
         if ((in.flags & MESH_FLAGS_SHADOW_RECEIVER_BIT) != 0u
@@ -534,44 +528,44 @@ fn apply_pbr_lighting(
 
         var light_contrib = lighting::directional_light(i, &lighting_input, enable_diffuse);
 
-@if(DIRECTIONAL_LIGHT_SHADOW_MAP_DEBUG_CASCADES)
-        light_contrib = shadows::cascade_debug_visualization(light_contrib, i, view_z);
-// #endif
+        @if(DIRECTIONAL_LIGHT_SHADOW_MAP_DEBUG_CASCADES) {
+            light_contrib = shadows::cascade_debug_visualization(light_contrib, i, view_z);
+        }
         direct_light += light_contrib * shadow;
 
-@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
+        @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+            // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
+            // world position, inverted normal and view vectors, and the following simplified
+            // values for a fully diffuse transmitted light contribution approximation:
+            //
+            // roughness = 1.0;
+            // NdotV = 1.0;
+            // R = vec3<f32>(0.0) // doesn't really matter
+            // F_ab = vec2<f32>(0.1)
+            // F0 = vec3<f32>(0.0)
+            var transmitted_shadow: f32 = 1.0;
+            if ((in.flags & (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)) == (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)
+                    && (view_bindings::lights.directional_lights[i].flags & mesh_view_types::DIRECTIONAL_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) != 0u) {
+                transmitted_shadow = shadows::fetch_directional_shadow(i, diffuse_transmissive_lobe_world_position, -in.world_normal, view_z);
+            }
+
+            let transmitted_light_contrib =
+                lighting::directional_light(i, &transmissive_lighting_input, enable_diffuse);
+            transmitted_light += transmitted_light_contrib * transmitted_shadow;
+        }
+    }
+
+    @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
         // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
         // world position, inverted normal and view vectors, and the following simplified
         // values for a fully diffuse transmitted light contribution approximation:
         //
-        // roughness = 1.0;
+        // perceptual_roughness = 1.0;
         // NdotV = 1.0;
-        // R = vec3<f32>(0.0) // doesn't really matter
-        // F_ab = vec2<f32>(0.1)
         // F0 = vec3<f32>(0.0)
-        var transmitted_shadow: f32 = 1.0;
-        if ((in.flags & (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)) == (MESH_FLAGS_SHADOW_RECEIVER_BIT | MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT)
-                && (view_bindings::lights.directional_lights[i].flags & mesh_view_types::DIRECTIONAL_LIGHT_FLAGS_SHADOWS_ENABLED_BIT) != 0u) {
-            transmitted_shadow = shadows::fetch_directional_shadow(i, diffuse_transmissive_lobe_world_position, -in.world_normal, view_z);
-        }
-
-        let transmitted_light_contrib =
-            lighting::directional_light(i, &transmissive_lighting_input, enable_diffuse);
-        transmitted_light += transmitted_light_contrib * transmitted_shadow;
-// #endif
+        // diffuse_occlusion = vec3<f32>(1.0)
+        transmitted_light += ambient::ambient_light(diffuse_transmissive_lobe_world_position, -in.N, -in.V, 1.0, diffuse_transmissive_color, vec3<f32>(0.0), 1.0, vec3<f32>(1.0));
     }
-
-@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
-    // NOTE: We use the diffuse transmissive color, the second Lambertian lobe's calculated
-    // world position, inverted normal and view vectors, and the following simplified
-    // values for a fully diffuse transmitted light contribution approximation:
-    //
-    // perceptual_roughness = 1.0;
-    // NdotV = 1.0;
-    // F0 = vec3<f32>(0.0)
-    // diffuse_occlusion = vec3<f32>(1.0)
-    transmitted_light += ambient::ambient_light(diffuse_transmissive_lobe_world_position, -in.N, -in.V, 1.0, diffuse_transmissive_color, vec3<f32>(0.0), 1.0, vec3<f32>(1.0));
-// #endif
 
     // Diffuse indirect lighting can come from a variety of sources. The
     // priority goes like this:
@@ -587,13 +581,13 @@ fn apply_pbr_lighting(
     var indirect_light = vec3(0.0f);
     var found_diffuse_indirect = false;
 
-@if(LIGHTMAP)
-    indirect_light += in.lightmap_light * diffuse_color;
-    found_diffuse_indirect = true;
-// #endif
+    @if(LIGHTMAP) {
+        indirect_light += in.lightmap_light * diffuse_color;
+        found_diffuse_indirect = true;
+    }
 
-@if(IRRADIANCE_VOLUME)
     // Irradiance volume light (indirect)
+    @if(IRRADIANCE_VOLUME)
     if (!found_diffuse_indirect) {
         let irradiance_volume_light = irradiance_volume::irradiance_volume_light(
             in.world_position.xyz,
@@ -603,46 +597,43 @@ fn apply_pbr_lighting(
         indirect_light += irradiance_volume_light * diffuse_color * diffuse_occlusion;
         found_diffuse_indirect = true;
     }
-// #endif
 
     // Environment map light (indirect)
-@if(ENVIRONMENT_MAP)
+    @if(ENVIRONMENT_MAP) {
+        @if(STANDARD_MATERIAL_ANISOTROPY)
+        var bent_normal_lighting_input = lighting_input;
+        @if(STANDARD_MATERIAL_ANISOTROPY)
+        bend_normal_for_anisotropy(&bent_normal_lighting_input);
+        @if(STANDARD_MATERIAL_ANISOTROPY)
+        let environment_map_lighting_input = &bent_normal_lighting_input;
+        @else
+        let environment_map_lighting_input = &lighting_input;
 
-@if(STANDARD_MATERIAL_ANISOTROPY)
-    var bent_normal_lighting_input = lighting_input;
-    bend_normal_for_anisotropy(&bent_normal_lighting_input);
-    let environment_map_lighting_input = &bent_normal_lighting_input;
-@else // #else   // STANDARD_MATERIAL_ANISOTROPY
-    let environment_map_lighting_input = &lighting_input;
-// #endif  // STANDARD_MATERIAL_ANISOTROPY
-
-    let environment_light = environment_map::environment_map_light(
-        environment_map_lighting_input,
-        &clusterable_object_index_ranges,
-        found_diffuse_indirect,
-    );
-
-    // If screen space reflections are going to be used for this material, don't
-    // accumulate environment map light yet. The SSR shader will do it.
-@if(SCREEN_SPACE_REFLECTIONS)
-    let use_ssr = perceptual_roughness <=
-        view_bindings::ssr_settings.perceptual_roughness_threshold;
-@else // #else   // SCREEN_SPACE_REFLECTIONS
-    let use_ssr = false;
-// #endif  // SCREEN_SPACE_REFLECTIONS
-
-    if (!use_ssr) {
         let environment_light = environment_map::environment_map_light(
-            &lighting_input,
+            environment_map_lighting_input,
             &clusterable_object_index_ranges,
-            found_diffuse_indirect
+            found_diffuse_indirect,
         );
 
-        indirect_light += environment_light.diffuse * diffuse_occlusion +
-            environment_light.specular * specular_occlusion;
-    }
+        // If screen space reflections are going to be used for this material, don't
+        // accumulate environment map light yet. The SSR shader will do it.
+        @if(SCREEN_SPACE_REFLECTIONS)
+        let use_ssr = perceptual_roughness <=
+            view_bindings::ssr_settings.perceptual_roughness_threshold;
+        @else
+        let use_ssr = false;
 
-// #endif  // ENVIRONMENT_MAP
+        if (!use_ssr) {
+            let environment_light = environment_map::environment_map_light(
+                &lighting_input,
+                &clusterable_object_index_ranges,
+                found_diffuse_indirect
+            );
+
+            indirect_light += environment_light.diffuse * diffuse_occlusion +
+                environment_light.specular * specular_occlusion;
+        }
+    }
 
     // Ambient light (indirect)
     indirect_light += ambient::ambient_light(in.world_position, in.N, in.V, NdotV, diffuse_color, F0, perceptual_roughness, diffuse_occlusion);
@@ -651,64 +642,61 @@ fn apply_pbr_lighting(
     // light in the call to `specular_transmissive_light()` below
     var specular_transmitted_environment_light = vec3<f32>(0.0);
 
-@if(ENVIRONMENT_MAP)
+    @if(ENVIRONMENT_MAP) {
+        @if(STANDARD_MATERIAL_DIFFUSE_OR_SPECULAR_TRANSMISSION) {
+            // NOTE: We use the diffuse transmissive color, inverted normal and view vectors,
+            // and the following simplified values for the transmitted environment light contribution
+            // approximation:
+            //
+            // diffuse_color = vec3<f32>(1.0) // later we use `diffuse_transmissive_color` and `specular_transmissive_color`
+            // NdotV = 1.0;
+            // R = T // see definition below
+            // F0 = vec3<f32>(1.0)
+            // diffuse_occlusion = 1.0
+            //
+            // (This one is slightly different from the other light types above, because the environment
+            // map light returns both diffuse and specular components separately, and we want to use both)
 
-@if(STANDARD_MATERIAL_DIFFUSE_OR_SPECULAR_TRANSMISSION)
-    // NOTE: We use the diffuse transmissive color, inverted normal and view vectors,
-    // and the following simplified values for the transmitted environment light contribution
-    // approximation:
-    //
-    // diffuse_color = vec3<f32>(1.0) // later we use `diffuse_transmissive_color` and `specular_transmissive_color`
-    // NdotV = 1.0;
-    // R = T // see definition below
-    // F0 = vec3<f32>(1.0)
-    // diffuse_occlusion = 1.0
-    //
-    // (This one is slightly different from the other light types above, because the environment
-    // map light returns both diffuse and specular components separately, and we want to use both)
+            let T = -normalize(
+                in.V + // start with view vector at entry point
+                refract(in.V, -in.N, 1.0 / ior) * thickness // add refracted vector scaled by thickness, towards exit point
+            ); // normalize to find exit point view vector
 
-    let T = -normalize(
-        in.V + // start with view vector at entry point
-        refract(in.V, -in.N, 1.0 / ior) * thickness // add refracted vector scaled by thickness, towards exit point
-    ); // normalize to find exit point view vector
+            var transmissive_environment_light_input: lighting::LightingInput;
+            transmissive_environment_light_input.diffuse_color = vec3(1.0);
+            transmissive_environment_light_input.layers[LAYER_BASE].NdotV = 1.0;
+            transmissive_environment_light_input.P = in.world_position.xyz;
+            transmissive_environment_light_input.layers[LAYER_BASE].N = -in.N;
+            transmissive_environment_light_input.V = in.V;
+            transmissive_environment_light_input.layers[LAYER_BASE].R = T;
+            transmissive_environment_light_input.layers[LAYER_BASE].perceptual_roughness = perceptual_roughness;
+            transmissive_environment_light_input.layers[LAYER_BASE].roughness = roughness;
+            transmissive_environment_light_input.F0_ = vec3<f32>(1.0);
+            transmissive_environment_light_input.F_ab = vec2(0.1);
+            @if(STANDARD_MATERIAL_CLEARCOAT) {
+                // No clearcoat.
+                transmissive_environment_light_input.clearcoat_strength = 0.0;
+                transmissive_environment_light_input.layers[LAYER_CLEARCOAT].NdotV = 0.0;
+                transmissive_environment_light_input.layers[LAYER_CLEARCOAT].N = in.N;
+                transmissive_environment_light_input.layers[LAYER_CLEARCOAT].R = vec3(0.0);
+                transmissive_environment_light_input.layers[LAYER_CLEARCOAT].perceptual_roughness = 0.0;
+                transmissive_environment_light_input.layers[LAYER_CLEARCOAT].roughness = 0.0;
+            }
 
-    var transmissive_environment_light_input: lighting::LightingInput;
-    transmissive_environment_light_input.diffuse_color = vec3(1.0);
-    transmissive_environment_light_input.layers[LAYER_BASE].NdotV = 1.0;
-    transmissive_environment_light_input.P = in.world_position.xyz;
-    transmissive_environment_light_input.layers[LAYER_BASE].N = -in.N;
-    transmissive_environment_light_input.V = in.V;
-    transmissive_environment_light_input.layers[LAYER_BASE].R = T;
-    transmissive_environment_light_input.layers[LAYER_BASE].perceptual_roughness = perceptual_roughness;
-    transmissive_environment_light_input.layers[LAYER_BASE].roughness = roughness;
-    transmissive_environment_light_input.F0_ = vec3<f32>(1.0);
-    transmissive_environment_light_input.F_ab = vec2(0.1);
-@if(STANDARD_MATERIAL_CLEARCOAT)
-    // No clearcoat.
-    transmissive_environment_light_input.clearcoat_strength = 0.0;
-    transmissive_environment_light_input.layers[LAYER_CLEARCOAT].NdotV = 0.0;
-    transmissive_environment_light_input.layers[LAYER_CLEARCOAT].N = in.N;
-    transmissive_environment_light_input.layers[LAYER_CLEARCOAT].R = vec3(0.0);
-    transmissive_environment_light_input.layers[LAYER_CLEARCOAT].perceptual_roughness = 0.0;
-    transmissive_environment_light_input.layers[LAYER_CLEARCOAT].roughness = 0.0;
-// #endif  // STANDARD_MATERIAL_CLEARCOAT
+            let transmitted_environment_light = environment_map::environment_map_light(
+                &transmissive_environment_light_input,
+                &clusterable_object_index_ranges,
+                false,
+            );
 
-    let transmitted_environment_light = environment_map::environment_map_light(
-        &transmissive_environment_light_input,
-        &clusterable_object_index_ranges,
-        false,
-    );
-
-@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
-    transmitted_light += transmitted_environment_light.diffuse * diffuse_transmissive_color;
-// #endif  // STANDARD_MATERIAL_DIFFUSE_TRANSMISSION
-@if(STANDARD_MATERIAL_SPECULAR_TRANSMISSION)
-    specular_transmitted_environment_light = transmitted_environment_light.specular * specular_transmissive_color;
-// #endif  // STANDARD_MATERIAL_SPECULAR_TRANSMISSION
-
-// #endif  // STANDARD_MATERIAL_SPECULAR_OR_DIFFUSE_TRANSMISSION
-
-// #endif  // ENVIRONMENT_MAP
+            @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+                transmitted_light += transmitted_environment_light.diffuse * diffuse_transmissive_color;
+            }
+            @if(STANDARD_MATERIAL_SPECULAR_TRANSMISSION) {
+                specular_transmitted_environment_light = transmitted_environment_light.specular * specular_transmissive_color;
+            }
+        }
+    } // ENVIRONMENT_MAP
 
     var emissive_light = emissive.rgb * output_color.a;
 
@@ -716,30 +704,30 @@ fn apply_pbr_lighting(
     // Consequently, the emission is darkened by the Fresnel term."
     //
     // <https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md#emission>
-@if(STANDARD_MATERIAL_CLEARCOAT)
-    emissive_light = emissive_light * (0.04 + (1.0 - 0.04) * pow(1.0 - clearcoat_NdotV, 5.0));
-// #endif
+    @if(STANDARD_MATERIAL_CLEARCOAT) {
+        emissive_light = emissive_light * (0.04 + (1.0 - 0.04) * pow(1.0 - clearcoat_NdotV, 5.0));
+    }
 
     emissive_light = emissive_light * mix(1.0, view_bindings::view.exposure, emissive.a);
 
-@if(STANDARD_MATERIAL_SPECULAR_TRANSMISSION)
-    transmitted_light += transmission::specular_transmissive_light(in.world_position, in.frag_coord.xyz, view_z, in.N, in.V, F0, ior, thickness, perceptual_roughness, specular_transmissive_color, specular_transmitted_environment_light).rgb;
+    @if(STANDARD_MATERIAL_SPECULAR_TRANSMISSION) {
+        transmitted_light += transmission::specular_transmissive_light(in.world_position, in.frag_coord.xyz, view_z, in.N, in.V, F0, ior, thickness, perceptual_roughness, specular_transmissive_color, specular_transmitted_environment_light).rgb;
 
-    if (in.material.flags & pbr_types::STANDARD_MATERIAL_FLAGS_ATTENUATION_ENABLED_BIT) != 0u {
-        // We reuse the `atmospheric_fog()` function here, as it's fundamentally
-        // equivalent to the attenuation that takes place inside the material volume,
-        // and will allow us to eventually hook up subsurface scattering more easily
-        var attenuation_fog: mesh_view_types::Fog;
-        attenuation_fog.base_color.a = 1.0;
-        attenuation_fog.be = pow(1.0 - in.material.attenuation_color.rgb, vec3<f32>(E)) / in.material.attenuation_distance;
-        // TODO: Add the subsurface scattering factor below
-        // attenuation_fog.bi = /* ... */
-        transmitted_light = bevy::pbr::fog::atmospheric_fog(
-            attenuation_fog, vec4<f32>(transmitted_light, 1.0), thickness,
-            vec3<f32>(0.0) // TODO: Pass in (pre-attenuated) scattered light contribution here
-        ).rgb;
+        if (in.material.flags & pbr_types::STANDARD_MATERIAL_FLAGS_ATTENUATION_ENABLED_BIT) != 0u {
+            // We reuse the `atmospheric_fog()` function here, as it's fundamentally
+            // equivalent to the attenuation that takes place inside the material volume,
+            // and will allow us to eventually hook up subsurface scattering more easily
+            var attenuation_fog: mesh_view_types::Fog;
+            attenuation_fog.base_color.a = 1.0;
+            attenuation_fog.be = pow(1.0 - in.material.attenuation_color.rgb, vec3<f32>(E)) / in.material.attenuation_distance;
+            // TODO: Add the subsurface scattering factor below
+            // attenuation_fog.bi = /* ... */
+            transmitted_light = bevy::pbr::fog::atmospheric_fog(
+                attenuation_fog, vec4<f32>(transmitted_light, 1.0), thickness,
+                vec3<f32>(0.0) // TODO: Pass in (pre-attenuated) scattered light contribution here
+            ).rgb;
+        }
     }
-// #endif
 
     // Total light
     output_color = vec4<f32>(
@@ -757,7 +745,6 @@ fn apply_pbr_lighting(
 
     return output_color;
 }
-// #endif // PREPASS_FRAGMENT
 
 @if(DISTANCE_FOG)
 fn apply_fog(fog_params: mesh_view_types::Fog, input_color: vec4<f32>, fragment_world_position: vec3<f32>, view_world_position: vec3<f32>) -> vec4<f32> {
@@ -797,59 +784,57 @@ fn apply_fog(fog_params: mesh_view_types::Fog, input_color: vec4<f32>, fragment_
         return input_color;
     }
 }
-// #endif  // DISTANCE_FOG
 
 @if(PREMULTIPLY_ALPHA)
 fn premultiply_alpha(standard_material_flags: u32, color: vec4<f32>) -> vec4<f32> {
-// `Blend`, `Premultiplied` and `Alpha` all share the same `BlendState`. Depending
-// on the alpha mode, we premultiply the color channels by the alpha channel value,
-// (and also optionally replace the alpha value with 0.0) so that the result produces
-// the desired blend mode when sent to the blending operation.
-@if(BLEND_PREMULTIPLIED_ALPHA)
-    // For `BlendState::PREMULTIPLIED_ALPHA_BLENDING` the blend function is:
-    //
-    //     result = 1 * src_color + (1 - src_alpha) * dst_color
-    let alpha_mode = standard_material_flags & pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_RESERVED_BITS;
-    if alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_ADD {
-        // Here, we premultiply `src_color` by `src_alpha`, and replace `src_alpha` with 0.0:
+    // `Blend`, `Premultiplied` and `Alpha` all share the same `BlendState`. Depending
+    // on the alpha mode, we premultiply the color channels by the alpha channel value,
+    // (and also optionally replace the alpha value with 0.0) so that the result produces
+    // the desired blend mode when sent to the blending operation.
+    @if(BLEND_PREMULTIPLIED_ALPHA) {
+        // For `BlendState::PREMULTIPLIED_ALPHA_BLENDING` the blend function is:
+        //
+        //     result = 1 * src_color + (1 - src_alpha) * dst_color
+        let alpha_mode = standard_material_flags & pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_RESERVED_BITS;
+        if alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_ADD {
+            // Here, we premultiply `src_color` by `src_alpha`, and replace `src_alpha` with 0.0:
+            //
+            //     src_color *= src_alpha
+            //     src_alpha = 0.0
+            //
+            // We end up with:
+            //
+            //     result = 1 * (src_alpha * src_color) + (1 - 0) * dst_color
+            //     result = src_alpha * src_color + 1 * dst_color
+            //
+            // Which is the blend operation for additive blending
+            return vec4<f32>(color.rgb * color.a, 0.0);
+        } else {
+            // Here, we don't do anything, so that we get premultiplied alpha blending. (As expected)
+            return color.rgba;
+        }
+    }
+    // `Multiply` uses its own `BlendState`, but we still need to premultiply here in the
+    // shader so that we get correct results as we tweak the alpha channel
+    @if(BLEND_MULTIPLY) {
+        // The blend function is:
+        //
+        //     result = dst_color * src_color + (1 - src_alpha) * dst_color
+        //
+        // We premultiply `src_color` by `src_alpha`:
         //
         //     src_color *= src_alpha
-        //     src_alpha = 0.0
         //
         // We end up with:
         //
-        //     result = 1 * (src_alpha * src_color) + (1 - 0) * dst_color
-        //     result = src_alpha * src_color + 1 * dst_color
+        //     result = dst_color * (src_color * src_alpha) + (1 - src_alpha) * dst_color
+        //     result = src_alpha * (src_color * dst_color) + (1 - src_alpha) * dst_color
         //
-        // Which is the blend operation for additive blending
-        return vec4<f32>(color.rgb * color.a, 0.0);
-    } else {
-        // Here, we don't do anything, so that we get premultiplied alpha blending. (As expected)
-        return color.rgba;
+        // Which is the blend operation for multiplicative blending with arbitrary mixing
+        // controlled by the source alpha channel
+        return vec4<f32>(color.rgb * color.a, color.a);
     }
-// #endif
-// `Multiply` uses its own `BlendState`, but we still need to premultiply here in the
-// shader so that we get correct results as we tweak the alpha channel
-@if(BLEND_MULTIPLY)
-    // The blend function is:
-    //
-    //     result = dst_color * src_color + (1 - src_alpha) * dst_color
-    //
-    // We premultiply `src_color` by `src_alpha`:
-    //
-    //     src_color *= src_alpha
-    //
-    // We end up with:
-    //
-    //     result = dst_color * (src_color * src_alpha) + (1 - src_alpha) * dst_color
-    //     result = src_alpha * (src_color * dst_color) + (1 - src_alpha) * dst_color
-    //
-    // Which is the blend operation for multiplicative blending with arbitrary mixing
-    // controlled by the source alpha channel
-    return vec4<f32>(color.rgb * color.a, color.a);
-// #endif
 }
-// #endif
 
 // fog, alpha premultiply
 // for non-hdr cameras, tonemapping and debanding
@@ -859,27 +844,28 @@ fn main_pass_post_lighting_processing(
 ) -> vec4<f32> {
     var output_color = input_color;
 
-@if(DISTANCE_FOG)
     // fog
+    @if(DISTANCE_FOG) {
+        
+    }
     if ((pbr_input.material.flags & pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT) != 0u) {
         output_color = apply_fog(view_bindings::fog, output_color, pbr_input.world_position.xyz, view_bindings::view.world_position.xyz);
     }
-// #endif  // DISTANCE_FOG
 
-@if(TONEMAP_IN_SHADER)
-    output_color = tone_mapping(output_color, view_bindings::view.color_grading);
-@if(DEBAND_DITHER)
-    var output_rgb = output_color.rgb;
-    output_rgb = powsafe(output_rgb, 1.0 / 2.2);
-    output_rgb += screen_space_dither(pbr_input.frag_coord.xy);
-    // This conversion back to linear space is required because our output texture format is
-    // SRGB; the GPU will assume our output is linear and will apply an SRGB conversion.
-    output_rgb = powsafe(output_rgb, 2.2);
-    output_color = vec4(output_rgb, output_color.a);
-// #endif
-// #endif
-@if(PREMULTIPLY_ALPHA)
-    output_color = premultiply_alpha(pbr_input.material.flags, output_color);
-// #endif
+    @if(TONEMAP_IN_SHADER) {
+        output_color = tone_mapping(output_color, view_bindings::view.color_grading);
+        @if(DEBAND_DITHER) {
+            var output_rgb = output_color.rgb;
+            output_rgb = powsafe(output_rgb, 1.0 / 2.2);
+            output_rgb += screen_space_dither(pbr_input.frag_coord.xy);
+            // This conversion back to linear space is required because our output texture format is
+            // SRGB; the GPU will assume our output is linear and will apply an SRGB conversion.
+            output_rgb = powsafe(output_rgb, 2.2);
+            output_color = vec4(output_rgb, output_color.a);
+        }
+    }
+    @if(PREMULTIPLY_ALPHA) {
+        output_color = premultiply_alpha(pbr_input.material.flags, output_color);
+    }
     return output_color;
 }

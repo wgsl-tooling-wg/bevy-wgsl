@@ -1,5 +1,3 @@
-
-
 import bevy::pbr::{
     meshlet_bindings::{
         Meshlet,
@@ -20,16 +18,14 @@ import bevy::pbr::{
 };
 import bevy::render::maths::{affine3_to_square, mat2x4_f32_to_mat3x3_unpack};
 
-@if(PREPASS_FRAGMENT)
-@if(MOTION_VECTOR_PREPASS)
+@if(PREPASS_FRAGMENT && MOTION_VECTOR_PREPASS)
 import bevy::pbr::{
     prepass_bindings::previous_view_uniforms,
     pbr_prepass_functions::calculate_motion_vector,
 };
-// #endif
-// #endif
 
 /// Functions to be used by materials for reading from a meshlet visibility buffer texture.
+
 
 @if(MESHLET_MESH_MATERIAL_PASS)
 struct PartialDerivatives {
@@ -39,6 +35,7 @@ struct PartialDerivatives {
 }
 
 // https://github.com/ConfettiFX/The-Forge/blob/9d43e69141a9cd0ce2ce2d2db5122234d3a2d5b5/Common_3/Renderer/VisibilityBuffer2/Shaders/FSL/vb_shading_utilities.h.fsl#L90-L150
+@if(MESHLET_MESH_MATERIAL_PASS)
 fn compute_partial_derivatives(vertex_world_positions: array<vec4<f32>, 3>, ndc_uv: vec2<f32>, half_screen_size: vec2<f32>) -> PartialDerivatives {
     var result: PartialDerivatives;
 
@@ -84,6 +81,7 @@ fn compute_partial_derivatives(vertex_world_positions: array<vec4<f32>, 3>, ndc_
     return result;
 }
 
+@if(MESHLET_MESH_MATERIAL_PASS)
 struct VertexOutput {
     position: vec4<f32>,
     world_position: vec4<f32>,
@@ -95,14 +93,12 @@ struct VertexOutput {
     mesh_flags: u32,
     cluster_id: u32,
     material_bind_group_slot: u32,
-@if(PREPASS_FRAGMENT)
-@if(MOTION_VECTOR_PREPASS)
+    @if(PREPASS_FRAGMENT && MOTION_VECTOR_PREPASS)
     motion_vector: vec2<f32>,
-// #endif
-// #endif
 }
 
 /// Load the visibility buffer texture and resolve it into a VertexOutput.
+@if(MESHLET_MESH_MATERIAL_PASS)
 fn resolve_vertex_output(frag_coord: vec4<f32>) -> VertexOutput {
     let packed_ids = u32(textureLoad(meshlet_visibility_buffer, vec2<u32>(frag_coord.xy)).r);
     let cluster_id = packed_ids >> 7u;
@@ -152,42 +148,53 @@ fn resolve_vertex_output(frag_coord: vec4<f32>) -> VertexOutput {
 
     let world_tangent = calculate_world_tangent(world_normal, ddx_world_position, ddy_world_position, ddx_uv, ddy_uv);
 
-@if(PREPASS_FRAGMENT)
-@if(MOTION_VECTOR_PREPASS)
-    let previous_world_from_local = affine3_to_square(instance_uniform.previous_world_from_local);
-    let previous_world_position_0 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_0.position, 1.0));
-    let previous_world_position_1 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_1.position, 1.0));
-    let previous_world_position_2 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_2.position, 1.0));
-    let previous_world_position = mat3x4(previous_world_position_0, previous_world_position_1, previous_world_position_2) * partial_derivatives.barycentrics;
-    let motion_vector = calculate_motion_vector(world_position, previous_world_position);
-// #endif
-// #endif
+    // TODO(mbr): this is not ideal
+    @if(PREPASS_FRAGMENT && MOTION_VECTOR_PREPASS) {
+        let previous_world_from_local = affine3_to_square(instance_uniform.previous_world_from_local);
+        let previous_world_position_0 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_0.position, 1.0));
+        let previous_world_position_1 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_1.position, 1.0));
+        let previous_world_position_2 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_2.position, 1.0));
+        let previous_world_position = mat3x4(previous_world_position_0, previous_world_position_1, previous_world_position_2) * partial_derivatives.barycentrics;
+        let motion_vector = calculate_motion_vector(world_position, previous_world_position);
 
-    return VertexOutput(
-        frag_coord,
-        world_position,
-        world_normal,
-        uv,
-        ddx_uv,
-        ddy_uv,
-        world_tangent,
-        instance_uniform.flags,
-        instance_id ^ meshlet_id,
-        instance_uniform.material_and_lightmap_bind_group_slot & 0xffffu,
-@if(PREPASS_FRAGMENT)
-@if(MOTION_VECTOR_PREPASS)
-        motion_vector,
-// #endif
-// #endif
-    );
+        return VertexOutput(
+            frag_coord,
+            world_position,
+            world_normal,
+            uv,
+            ddx_uv,
+            ddy_uv,
+            world_tangent,
+            instance_uniform.flags,
+            instance_id ^ meshlet_id,
+            instance_uniform.material_and_lightmap_bind_group_slot & 0xffffu,
+            motion_vector
+        );
+    }
+    @else {
+        return VertexOutput(
+            frag_coord,
+            world_position,
+            world_normal,
+            uv,
+            ddx_uv,
+            ddy_uv,
+            world_tangent,
+            instance_uniform.flags,
+            instance_id ^ meshlet_id,
+            instance_uniform.material_and_lightmap_bind_group_slot & 0xffffu,
+        );
+    }
 }
 
+@if(MESHLET_MESH_MATERIAL_PASS)
 struct MeshletVertex {
     position: vec3<f32>,
     normal: vec3<f32>,
     uv: vec2<f32>,
 }
 
+@if(MESHLET_MESH_MATERIAL_PASS)
 fn load_vertex(meshlet: ptr<function, Meshlet>, vertex_id: u32) -> MeshletVertex {
     return MeshletVertex(
         get_meshlet_vertex_position(meshlet, vertex_id),
@@ -196,6 +203,7 @@ fn load_vertex(meshlet: ptr<function, Meshlet>, vertex_id: u32) -> MeshletVertex
     );
 }
 
+@if(MESHLET_MESH_MATERIAL_PASS)
 fn normal_local_to_world(vertex_normal: vec3<f32>, instance_uniform: ptr<function, Mesh>) -> vec3<f32> {
     if any(vertex_normal != vec3<f32>(0.0)) {
         return normalize(
@@ -210,6 +218,7 @@ fn normal_local_to_world(vertex_normal: vec3<f32>, instance_uniform: ptr<functio
 }
 
 // https://www.jeremyong.com/graphics/2023/12/16/surface-gradient-bump-mapping/#surface-gradient-from-a-tangent-space-normal-vector-without-an-explicit-tangent-basis
+@if(MESHLET_MESH_MATERIAL_PASS)
 fn calculate_world_tangent(
     world_normal: vec3<f32>,
     ddx_world_position: vec3<f32>,
@@ -237,4 +246,3 @@ fn calculate_world_tangent(
 
     return vec4(world_tangent, -w); // TODO: Unclear why we need to negate this to match mikktspace generated tangents
 }
-// #endif

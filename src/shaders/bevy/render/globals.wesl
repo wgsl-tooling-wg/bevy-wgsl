@@ -9,8 +9,7 @@ struct Globals {
     // Frame count since the start of the app.
     // It wraps to zero when it reaches the maximum value of a u32.
     frame_count: u32,
-@if(SIXTEEN_BYTE_ALIGNMENT)
     // WebGL2 structs must be 16 byte aligned.
+    @if(SIXTEEN_BYTE_ALIGNMENT)
     _webgl2_padding: f32
-// #endif
 };

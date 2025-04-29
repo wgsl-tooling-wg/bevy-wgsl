@@ -1,5 +1,3 @@
-
-
 import bevy::pbr::{
     pbr_types::{PbrInput, pbr_input_new, STANDARD_MATERIAL_FLAGS_UNLIT_BIT},
     pbr_deferred_types as deferred_types,
@@ -13,13 +11,11 @@ import bevy::pbr::{
 
 @if(MESHLET_MESH_MATERIAL_PASS)
 import bevy::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
-@else // #else
+@else
 import bevy::pbr::prepass_io::VertexOutput;
-// #endif
 
 @if(MOTION_VECTOR_PREPASS)
 import bevy::pbr::pbr_prepass_functions::calculate_motion_vector;
-// #endif
 
 // Creates the deferred gbuffer from a PbrInput.
 fn deferred_gbuffer_from_pbr_input(in: PbrInput) -> vec4<u32> {
@@ -32,19 +28,20 @@ fn deferred_gbuffer_from_pbr_input(in: PbrInput) -> vec4<u32> {
     let diffuse_occlusion = dot(in.diffuse_occlusion, rec_709_coeffs);
     // Only monochrome specular supported.
     let reflectance = dot(in.material.reflectance, rec_709_coeffs);
-@if(WEBGL2)
+
+    @if(WEBGL2)
     var props = deferred_types::pack_unorm3x4_plus_unorm_20_(vec4(
         reflectance,
         in.material.metallic,
         diffuse_occlusion,
         in.frag_coord.z));
-@else // #else
+    @else
     var props = deferred_types::pack_unorm4x8_(vec4(
         reflectance, // could be fewer bits
         in.material.metallic, // could be fewer bits
         diffuse_occlusion, // is this worth including?
         0.0)); // spare
-// #endif // WEBGL2
+
     let flags = deferred_types::deferred_flags_from_mesh_material_flags(in.flags, in.material.flags);
     let octahedral_normal = octahedral_encode(normalize(in.N));
     var base_color_srgb = vec3(0.0);
@@ -100,14 +97,19 @@ fn pbr_input_from_deferred_gbuffer(frag_coord: vec4<f32>, gbuffer: vec4<u32>) ->
         pbr.material.base_color = vec4(pow(base_rough.rgb, vec3(2.2)), 1.0);
         pbr.material.emissive = vec4(emissive, 0.0);
     }
-@if(WEBGL2)
+    @if(WEBGL2)
     let props = deferred_types::unpack_unorm3x4_plus_unorm_20_(gbuffer.b);
     // Bias to 0.5 since that's the value for almost all materials.
-    pbr.material.reflectance = vec3(saturate(props.r - 0.03333333333));
-@else // #else
+    @else
     let props = deferred_types::unpack_unorm4x8_(gbuffer.b);
-    pbr.material.reflectance = vec3(props.r);
-// #endif // WEBGL2
+
+    @if(WEBGL2) {
+        pbr.material.reflectance = vec3(saturate(props.r - 0.03333333333));
+    }
+    @else {
+        pbr.material.reflectance = vec3(props.r);
+    }
+
     pbr.material.metallic = props.g;
     pbr.diffuse_occlusion = vec3(props.b);
     let octahedral_normal = deferred_types::unpack_24bit_normal(gbuffer.a);
@@ -136,18 +138,18 @@ fn deferred_output(in: VertexOutput, pbr_input: PbrInput) -> FragmentOutput {
     // lighting pass id (used to determine which lighting shader to run for the fragment)
     out.deferred_lighting_pass_id = pbr_input.material.deferred_lighting_pass_id;
     // normal if required
-@if(NORMAL_PREPASS)
-    out.normal = vec4(in.world_normal * 0.5 + vec3(0.5), 1.0);
-// #endif
+    @if(NORMAL_PREPASS) {
+        out.normal = vec4(in.world_normal * 0.5 + vec3(0.5), 1.0);
+    }
     // motion vectors if required
-@if(MOTION_VECTOR_PREPASS)
-@if(MESHLET_MESH_MATERIAL_PASS)
-    out.motion_vector = in.motion_vector;
-@else // #else
-    out.motion_vector = calculate_motion_vector(in.world_position, in.previous_world_position);
-// #endif
-// #endif
+    @if(MOTION_VECTOR_PREPASS) {
+        @if(MESHLET_MESH_MATERIAL_PASS) {
+            out.motion_vector = in.motion_vector;
+        }
+        @else {
+            out.motion_vector = calculate_motion_vector(in.world_position, in.previous_world_position);
+        }
+    }
 
     return out;
 }
-// #endif

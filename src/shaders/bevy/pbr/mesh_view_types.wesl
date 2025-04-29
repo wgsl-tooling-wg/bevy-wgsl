@@ -29,7 +29,7 @@ struct DirectionalCascade {
 }
 
 struct DirectionalLight {
-    cascades: array<DirectionalCascade, #{MAX_CASCADES_PER_LIGHT}>,
+    cascades: array<DirectionalCascade, constants::MAX_CASCADES_PER_LIGHT>,
     color: vec4<f32>,
     direction_to_light: vec3<f32>,
     // 'flags' is a bit field indicating various options. u32 is 32 bits so we have up to 32 options.
@@ -49,7 +49,7 @@ const DIRECTIONAL_LIGHT_FLAGS_AFFECTS_LIGHTMAPPED_MESH_DIFFUSE_BIT: u32 = 4u;
 
 struct Lights {
     // NOTE: this array size must be kept in sync with the constants defined in bevy::pbr/src/render/light.rs
-    directional_lights: array<DirectionalLight, #{MAX_DIRECTIONAL_LIGHTS}u>,
+    directional_lights: array<DirectionalLight, u32(constants::MAX_DIRECTIONAL_LIGHTS)>,
     ambient_color: vec4<f32>,
     // x/y/z dimensions and n_clusters in w
     cluster_dimensions: vec4<u32>,
@@ -95,24 +95,28 @@ const FOG_MODE_EXPONENTIAL: u32           = 2u;
 const FOG_MODE_EXPONENTIAL_SQUARED: u32   = 3u;
 const FOG_MODE_ATMOSPHERIC: u32           = 4u;
 
-#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
+@if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_3)
 struct ClusterableObjects {
     data: array<ClusterableObject>,
 };
-struct ClusterLightIndexLists {
-    data: array<u32>,
-};
-struct ClusterOffsetsAndCounts {
-    data: array<array<vec4<u32>, 2>>,
-};
-@else // #else
+@else
 struct ClusterableObjects {
     data: array<ClusterableObject, 204u>,
 };
+@if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_3)
+struct ClusterLightIndexLists {
+    data: array<u32>,
+};
+@else
 struct ClusterLightIndexLists {
     // each u32 contains 4 u8 indices into the ClusterableObjects array
     data: array<vec4<u32>, 1024u>,
 };
+@if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_3)
+struct ClusterOffsetsAndCounts {
+    data: array<array<vec4<u32>, 2>>,
+};
+@else
 struct ClusterOffsetsAndCounts {
     // each u32 contains a 24-bit index into ClusterLightIndexLists in the high 24 bits
     // and an 8-bit count of the number of lights in the low 8 bits

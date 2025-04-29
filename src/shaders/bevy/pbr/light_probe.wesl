@@ -1,5 +1,3 @@
-
-
 import bevy::pbr::clustered_forward;
 import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
 import bevy::pbr::mesh_view_bindings::light_probes;
@@ -29,7 +27,6 @@ fn transpose_affine_matrix(matrix: mat3x4<f32>) -> mat4x4<f32> {
     return transpose(matrix4x4);
 }
 
-#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
 
 // Searches for a light probe that contains the fragment.
 //
@@ -37,6 +34,7 @@ fn transpose_affine_matrix(matrix: mat3x4<f32>) -> mat4x4<f32> {
 // light probes are clustered.
 //
 // TODO: Interpolate between multiple light probes.
+@if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_3)
 fn query_light_probe(
     world_position: vec3<f32>,
     is_irradiance_volume: bool,
@@ -91,8 +89,6 @@ fn query_light_probe(
     return result;
 }
 
-@else // #else   // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
-
 // Searches for a light probe that contains the fragment.
 //
 // This is the version that's used when storage buffers aren't available and
@@ -100,6 +96,7 @@ fn query_light_probe(
 // light probes. Because platforms without sufficient SSBO bindings typically
 // lack bindless shaders, there will usually only be one of each type of light
 // probe present anyway.
+@else
 fn query_light_probe(
     world_position: vec3<f32>,
     is_irradiance_volume: bool,
@@ -150,5 +147,3 @@ fn query_light_probe(
 
     return result;
 }
-
-// #endif  // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3

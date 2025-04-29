@@ -9,8 +9,6 @@ struct VertexOutput {
     @location(2) uv: vec2<f32>,
     @if(VERTEX_TANGENTS)
     @location(3) world_tangent: vec4<f32>,
-    // #endif
     @if(VERTEX_COLORS)
     @location(4) color: vec4<f32>,
-    // #endif
 }

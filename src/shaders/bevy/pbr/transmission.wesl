@@ -1,5 +1,3 @@
-
-
 import bevy::pbr::{
     lighting,
     prepass_utils,
@@ -12,7 +10,6 @@ import bevy::render::maths::PI;
 
 @if(TONEMAP_IN_SHADER)
 import bevy::core_pipeline::tonemapping::approximate_inverse_tone_mapping;
-// #endif
 
 fn specular_transmissive_light(world_position: vec4<f32>, frag_coord: vec3<f32>, view_z: f32, N: vec3<f32>, V: vec3<f32>, F0: vec3<f32>, ior: f32, thickness: f32, perceptual_roughness: f32, specular_transmissive_color: vec3<f32>, transmitted_environment_light_specular: vec3<f32>) -> vec3<f32> {
     // Calculate the ratio between refraction indexes. Assume air/vacuum for the space outside the mesh
@@ -65,18 +62,15 @@ fn fetch_transmissive_background_non_rough(offset_position: vec2<f32>, frag_coor
         0.0
     );
 
-@if(DEPTH_PREPASS)
-@if(!WEBGL2)
     // Use depth prepass data to reject values that are in front of the current fragment
+    @if(DEPTH_PREPASS && !WEBGL2)
     if prepass_utils::prepass_depth(vec4<f32>(offset_position * view_bindings::view.viewport.zw, 0.0, 0.0), 0u) > frag_coord.z {
         background_color.a = 0.0;
     }
-// #endif
-// #endif
 
-@if(TONEMAP_IN_SHADER)
-    background_color = approximate_inverse_tone_mapping(background_color, view_bindings::view.color_grading);
-// #endif
+    @if(TONEMAP_IN_SHADER) {
+        background_color = approximate_inverse_tone_mapping(background_color, view_bindings::view.color_grading);
+    }
 
     return background_color;
 }
@@ -97,26 +91,28 @@ fn fetch_transmissive_background(offset_position: vec2<f32>, frag_coord: vec3<f3
     // - proportional to the inverse of view z
     let blur_intensity = (perceptual_roughness * perceptual_roughness) / view_z;
 
-@if(SCREEN_SPACE_SPECULAR_TRANSMISSION_BLUR_TAPS)
-    let num_taps = #{SCREEN_SPACE_SPECULAR_TRANSMISSION_BLUR_TAPS}; // Controlled by the `Camera3d::screen_space_specular_transmission_quality` property
-@else // #else
+    @if(SCREEN_SPACE_SPECULAR_TRANSMISSION_BLUR_TAPS)
+    let num_taps = constants::SCREEN_SPACE_SPECULAR_TRANSMISSION_BLUR_TAPS; // Controlled by the `Camera3d::screen_space_specular_transmission_quality` property
+    @else
     let num_taps = 8; // Fallback to 8 taps, if not specified
-// #endif
+
     let num_spirals = i32(ceil(f32(num_taps) / 8.0));
-@if(TEMPORAL_JITTER)
+
+    @if(TEMPORAL_JITTER)
     let random_angle = interleaved_gradient_noise(frag_coord.xy, view_bindings::globals.frame_count);
-@else // #else
+    @else
     let random_angle = interleaved_gradient_noise(frag_coord.xy, 0u);
-// #endif
+
     // Pixel checkerboard pattern (helps make the interleaved gradient noise pattern less visible)
+    @if(TEMPORAL_JITTER)
     let pixel_checkboard = (
-@if(TEMPORAL_JITTER)
         // 0 or 1 on even/odd pixels, alternates every frame
         (i32(frag_coord.x) + i32(frag_coord.y) + i32(view_bindings::globals.frame_count)) % 2
-@else // #else
+    );
+    @else
+    let pixel_checkboard = (
         // 0 or 1 on even/odd pixels
         (i32(frag_coord.x) + i32(frag_coord.y)) % 2
-// #endif
     );
 
     var result = vec4<f32>(0.0);
@@ -165,14 +161,11 @@ fn fetch_transmissive_background(offset_position: vec2<f32>, frag_coord: vec3<f3
             0.0
         );
 
-@if(DEPTH_PREPASS)
-@if(!WEBGL2)
         // Use depth prepass data to reject values that are in front of the current fragment
+        @if(DEPTH_PREPASS && !WEBGL2)
         if prepass_utils::prepass_depth(vec4<f32>(modified_offset_position * view_bindings::view.viewport.zw, 0.0, 0.0), 0u) > frag_coord.z {
             sample = vec4<f32>(0.0);
         }
-// #endif
-// #endif
 
         // As blur intensity grows higher, gradually limit *very bright* color RGB values towards a
         // maximum length of 1.0 to prevent stray “firefly” pixel artifacts. This can potentially make
@@ -184,9 +177,9 @@ fn fetch_transmissive_background(offset_position: vec2<f32>, frag_coord: vec3<f3
 
     result /= f32(num_taps);
 
-@if(TONEMAP_IN_SHADER)
-    result = approximate_inverse_tone_mapping(result, view_bindings::view.color_grading);
-// #endif
+    @if(TONEMAP_IN_SHADER) {
+        result = approximate_inverse_tone_mapping(result, view_bindings::view.color_grading);
+    }
 
     return result;
 }

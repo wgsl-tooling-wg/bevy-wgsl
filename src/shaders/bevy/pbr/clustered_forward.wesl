@@ -68,54 +68,51 @@ const CLUSTER_COUNT_SIZE = 9u;
 // primarily), light probes aren't clustered, and therefore both light probe
 // index ranges will be empty.
 fn unpack_clusterable_object_index_ranges(cluster_index: u32) -> ClusterableObjectIndexRanges {
-#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
+    @if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_3) {
+        let offset_and_counts_a = bindings::cluster_offsets_and_counts.data[cluster_index][0];
+        let offset_and_counts_b = bindings::cluster_offsets_and_counts.data[cluster_index][1];
 
-    let offset_and_counts_a = bindings::cluster_offsets_and_counts.data[cluster_index][0];
-    let offset_and_counts_b = bindings::cluster_offsets_and_counts.data[cluster_index][1];
+        // Sum up the counts to produce the range brackets.
+        //
+        // We could have stored the range brackets in `cluster_offsets_and_counts`
+        // directly, but doing it this way makes the logic in this path more
+        // consistent with the WebGL 2 path below.
+        let point_light_offset = offset_and_counts_a.x;
+        let spot_light_offset = point_light_offset + offset_and_counts_a.y;
+        let reflection_probe_offset = spot_light_offset + offset_and_counts_a.z;
+        let irradiance_volume_offset = reflection_probe_offset + offset_and_counts_a.w;
+        let decal_offset = irradiance_volume_offset + offset_and_counts_b.x;
+        let last_clusterable_offset = decal_offset + offset_and_counts_b.y;
+        return ClusterableObjectIndexRanges(
+            point_light_offset,
+            spot_light_offset,
+            reflection_probe_offset,
+            irradiance_volume_offset,
+            decal_offset,
+            last_clusterable_offset
+        );
+    }
+    @else {
+        let raw_offset_and_counts = bindings::cluster_offsets_and_counts.data[cluster_index >> 2u][cluster_index & ((1u << 2u) - 1u)];
+        //  [ 31     ..     18 | 17      ..      9 | 8       ..     0 ]
+        //  [      offset      | point light count | spot light count ]
+        let offset_and_counts = vec3<u32>(
+            (raw_offset_and_counts >> (CLUSTER_COUNT_SIZE * 2u)) & ((1u << (32u - (CLUSTER_COUNT_SIZE * 2u))) - 1u),
+            (raw_offset_and_counts >> CLUSTER_COUNT_SIZE)        & ((1u << CLUSTER_COUNT_SIZE) - 1u),
+            raw_offset_and_counts                                & ((1u << CLUSTER_COUNT_SIZE) - 1u),
+        );
 
-    // Sum up the counts to produce the range brackets.
-    //
-    // We could have stored the range brackets in `cluster_offsets_and_counts`
-    // directly, but doing it this way makes the logic in this path more
-    // consistent with the WebGL 2 path below.
-    let point_light_offset = offset_and_counts_a.x;
-    let spot_light_offset = point_light_offset + offset_and_counts_a.y;
-    let reflection_probe_offset = spot_light_offset + offset_and_counts_a.z;
-    let irradiance_volume_offset = reflection_probe_offset + offset_and_counts_a.w;
-    let decal_offset = irradiance_volume_offset + offset_and_counts_b.x;
-    let last_clusterable_offset = decal_offset + offset_and_counts_b.y;
-    return ClusterableObjectIndexRanges(
-        point_light_offset,
-        spot_light_offset,
-        reflection_probe_offset,
-        irradiance_volume_offset,
-        decal_offset,
-        last_clusterable_offset
-    );
+        // We don't cluster reflection probes or irradiance volumes on this
+        // platform, as there's no room in the UBO. Thus, those offset ranges
+        // (corresponding to `offset_d` and `offset_e` above) are empty and are
+        // simply copies of `offset_c`.
 
-@else // #else   // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
+        let offset_a = offset_and_counts.x;
+        let offset_b = offset_a + offset_and_counts.y;
+        let offset_c = offset_b + offset_and_counts.z;
 
-    let raw_offset_and_counts = bindings::cluster_offsets_and_counts.data[cluster_index >> 2u][cluster_index & ((1u << 2u) - 1u)];
-    //  [ 31     ..     18 | 17      ..      9 | 8       ..     0 ]
-    //  [      offset      | point light count | spot light count ]
-    let offset_and_counts = vec3<u32>(
-        (raw_offset_and_counts >> (CLUSTER_COUNT_SIZE * 2u)) & ((1u << (32u - (CLUSTER_COUNT_SIZE * 2u))) - 1u),
-        (raw_offset_and_counts >> CLUSTER_COUNT_SIZE)        & ((1u << CLUSTER_COUNT_SIZE) - 1u),
-        raw_offset_and_counts                                & ((1u << CLUSTER_COUNT_SIZE) - 1u),
-    );
-
-    // We don't cluster reflection probes or irradiance volumes on this
-    // platform, as there's no room in the UBO. Thus, those offset ranges
-    // (corresponding to `offset_d` and `offset_e` above) are empty and are
-    // simply copies of `offset_c`.
-
-    let offset_a = offset_and_counts.x;
-    let offset_b = offset_a + offset_and_counts.y;
-    let offset_c = offset_b + offset_and_counts.z;
-
-    return ClusterableObjectIndexRanges(offset_a, offset_b, offset_c, offset_c, offset_c, offset_c);
-
-// #endif  // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
+        return ClusterableObjectIndexRanges(offset_a, offset_b, offset_c, offset_c, offset_c, offset_c);
+    }
 }
 
 // Returns the index of the clusterable object at the given offset.
@@ -123,16 +120,17 @@ fn unpack_clusterable_object_index_ranges(cluster_index: u32) -> ClusterableObje
 // Note that, in the case of a light probe, the index refers to an element in
 // one of the two `light_probes` sublists, not the `clusterable_objects` list.
 fn get_clusterable_object_id(index: u32) -> u32 {
-#if AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
-    return bindings::clusterable_object_index_lists.data[index];
-@else // #else
-    // The index is correct but in clusterable_object_index_lists we pack 4 u8s into a u32
-    // This means the index into clusterable_object_index_lists is index / 4
-    let indices = bindings::clusterable_object_index_lists.data[index >> 4u][(index >> 2u) &
-        ((1u << 2u) - 1u)];
-    // And index % 4 gives the sub-index of the u8 within the u32 so we shift by 8 * sub-index
-    return (indices >> (8u * (index & ((1u << 2u) - 1u)))) & ((1u << 8u) - 1u);
-// #endif
+    @if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_3) {
+        return bindings::clusterable_object_index_lists.data[index];
+    }
+    @else {
+        // The index is correct but in clusterable_object_index_lists we pack 4 u8s into a u32
+        // This means the index into clusterable_object_index_lists is index / 4
+        let indices = bindings::clusterable_object_index_lists.data[index >> 4u][(index >> 2u) &
+            ((1u << 2u) - 1u)];
+        // And index % 4 gives the sub-index of the u8 within the u32 so we shift by 8 * sub-index
+        return (indices >> (8u * (index & ((1u << 2u) - 1u)))) & ((1u << 8u) - 1u);
+    }
 }
 
 fn cluster_debug_visualization(
@@ -145,49 +143,49 @@ fn cluster_debug_visualization(
     var output_color = input_color;
 
     // Cluster allocation debug (using 'over' alpha blending)
-@if(CLUSTERED_FORWARD_DEBUG_Z_SLICES)
-    // NOTE: This debug mode visualizes the z-slices
-    let cluster_overlay_alpha = 0.1;
-    var z_slice: u32 = view_z_to_z_slice(view_z, is_orthographic);
-    // A hack to make the colors alternate a bit more
-    if (z_slice & 1u) == 1u {
-        z_slice = z_slice + bindings::lights.cluster_dimensions.z / 2u;
+    @if(CLUSTERED_FORWARD_DEBUG_Z_SLICES) {
+        // NOTE: This debug mode visualizes the z-slices
+        let cluster_overlay_alpha = 0.1;
+        var z_slice: u32 = view_z_to_z_slice(view_z, is_orthographic);
+        // A hack to make the colors alternate a bit more
+        if (z_slice & 1u) == 1u {
+            z_slice = z_slice + bindings::lights.cluster_dimensions.z / 2u;
+        }
+        let slice_color_hsv = vec3(
+            f32(z_slice) / f32(bindings::lights.cluster_dimensions.z + 1u) * PI_2,
+            1.0,
+            0.5
+        );
+        let slice_color = hsv_to_rgb(slice_color_hsv);
+        output_color = vec4<f32>(
+            (1.0 - cluster_overlay_alpha) * output_color.rgb + cluster_overlay_alpha * slice_color,
+            output_color.a
+        );
     }
-    let slice_color_hsv = vec3(
-        f32(z_slice) / f32(bindings::lights.cluster_dimensions.z + 1u) * PI_2,
-        1.0,
-        0.5
-    );
-    let slice_color = hsv_to_rgb(slice_color_hsv);
-    output_color = vec4<f32>(
-        (1.0 - cluster_overlay_alpha) * output_color.rgb + cluster_overlay_alpha * slice_color,
-        output_color.a
-    );
-// #endif // CLUSTERED_FORWARD_DEBUG_Z_SLICES
-@if(CLUSTERED_FORWARD_DEBUG_CLUSTER_COMPLEXITY)
-    // NOTE: This debug mode visualizes the number of clusterable objects within
-    // the cluster that contains the fragment. It shows a sort of cluster
-    // complexity measure.
-    let cluster_overlay_alpha = 0.1;
-    let max_complexity_per_cluster = 64.0;
-    let object_count = clusterable_object_index_ranges.first_reflection_probe_index_offset -
-        clusterable_object_index_ranges.first_point_light_index_offset;
-    output_color.r = (1.0 - cluster_overlay_alpha) * output_color.r + cluster_overlay_alpha *
-        smoothstep(0.0, max_complexity_per_cluster, f32(object_count));
-    output_color.g = (1.0 - cluster_overlay_alpha) * output_color.g + cluster_overlay_alpha *
-        (1.0 - smoothstep(0.0, max_complexity_per_cluster, f32(object_count)));
-// #endif // CLUSTERED_FORWARD_DEBUG_CLUSTER_COMPLEXITY
-@if(CLUSTERED_FORWARD_DEBUG_CLUSTER_COHERENCY)
-    // NOTE: Visualizes the cluster to which the fragment belongs
-    let cluster_overlay_alpha = 0.1;
-    var rng = cluster_index;
-    let cluster_color_hsv = vec3(rand_f(&rng) * PI_2, 1.0, 0.5);
-    let cluster_color = hsv_to_rgb(cluster_color_hsv);
-    output_color = vec4<f32>(
-        (1.0 - cluster_overlay_alpha) * output_color.rgb + cluster_overlay_alpha * cluster_color,
-        output_color.a
-    );
-// #endif // CLUSTERED_FORWARD_DEBUG_CLUSTER_COHERENCY
+    @if(CLUSTERED_FORWARD_DEBUG_CLUSTER_COMPLEXITY) {
+        // NOTE: This debug mode visualizes the number of clusterable objects within
+        // the cluster that contains the fragment. It shows a sort of cluster
+        // complexity measure.
+        let cluster_overlay_alpha = 0.1;
+        let max_complexity_per_cluster = 64.0;
+        let object_count = clusterable_object_index_ranges.first_reflection_probe_index_offset -
+            clusterable_object_index_ranges.first_point_light_index_offset;
+        output_color.r = (1.0 - cluster_overlay_alpha) * output_color.r + cluster_overlay_alpha *
+            smoothstep(0.0, max_complexity_per_cluster, f32(object_count));
+        output_color.g = (1.0 - cluster_overlay_alpha) * output_color.g + cluster_overlay_alpha *
+            (1.0 - smoothstep(0.0, max_complexity_per_cluster, f32(object_count)));
+    }
+    @if(CLUSTERED_FORWARD_DEBUG_CLUSTER_COHERENCY) {
+        // NOTE: Visualizes the cluster to which the fragment belongs
+        let cluster_overlay_alpha = 0.1;
+        var rng = cluster_index;
+        let cluster_color_hsv = vec3(rand_f(&rng) * PI_2, 1.0, 0.5);
+        let cluster_color = hsv_to_rgb(cluster_color_hsv);
+        output_color = vec4<f32>(
+            (1.0 - cluster_overlay_alpha) * output_color.rgb + cluster_overlay_alpha * cluster_color,
+            output_color.a
+        );
+    }
 
     return output_color;
 }
