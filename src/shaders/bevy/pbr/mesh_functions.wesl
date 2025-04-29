@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     mesh_view_bindings::{
         view,
         visibility_ranges,
@@ -9,8 +9,8 @@
     mesh_bindings::mesh,
     mesh_types::MESH_FLAGS_SIGN_DETERMINANT_MODEL_3X3_BIT,
     view_transformations::position_world_to_clip,
-}
-#import bevy_render::maths::{affine3_to_square, mat2x4_f32_to_mat3x3_unpack}
+};
+import bevy::render::maths::{affine3_to_square, mat2x4_f32_to_mat3x3_unpack};
 
 #ifndef MESHLET_MESH_MATERIAL_PASS
 

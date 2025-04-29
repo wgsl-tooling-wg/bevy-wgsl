@@ -1,11 +1,11 @@
 
 
-#import bevy_pbr::light_probe::query_light_probe
-#import bevy_pbr::mesh_view_bindings as bindings
-#import bevy_pbr::mesh_view_bindings::light_probes
-#import bevy_pbr::mesh_view_bindings::environment_map_uniform
-#import bevy_pbr::lighting::{F_Schlick_vec, LightingInput, LayerLightingInput, LAYER_BASE, LAYER_CLEARCOAT}
-#import bevy_pbr::clustered_forward::ClusterableObjectIndexRanges
+import bevy::pbr::light_probe::query_light_probe;
+import bevy::pbr::mesh_view_bindings as bindings;
+import bevy::pbr::mesh_view_bindings::light_probes;
+import bevy::pbr::mesh_view_bindings::environment_map_uniform;
+import bevy::pbr::lighting::{F_Schlick_vec, LightingInput, LayerLightingInput, LAYER_BASE, LAYER_CLEARCOAT};
+import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
 
 struct EnvironmentMapLight {
     diffuse: vec3<f32>,

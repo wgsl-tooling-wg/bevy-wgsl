@@ -2,7 +2,7 @@
 
 #ifdef MORPH_TARGETS
 
-#import bevy_pbr::mesh_types::MorphWeights;
+import bevy::pbr::mesh_types::MorphWeights;;
 
 @group(1) @binding(2) var<uniform> morph_weights: MorphWeights;
 @group(1) @binding(3) var morph_targets: texture_3d<f32>;

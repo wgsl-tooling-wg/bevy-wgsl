@@ -1,18 +1,18 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     mesh_view_types::POINT_LIGHT_FLAGS_SPOT_LIGHT_Y_NEGATIVE,
     mesh_view_bindings as view_bindings,
     shadow_sampling::{
         SPOT_SHADOW_TEXEL_SIZE, sample_shadow_cubemap, sample_shadow_cubemap_pcss,
         sample_shadow_map, sample_shadow_map_pcss,
     }
-}
+};
 
-#import bevy_render::{
+import bevy::render::{
     color_operations::hsv_to_rgb,
     maths::PI_2
-}
+};
 
 const flip_z: vec3<f32> = vec3<f32>(1.0, 1.0, -1.0);
 

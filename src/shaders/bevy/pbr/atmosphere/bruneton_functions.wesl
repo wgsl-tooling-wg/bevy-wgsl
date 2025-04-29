@@ -55,10 +55,10 @@
 
 
 
-#import bevy_pbr::atmosphere::{
+import bevy::pbr::atmosphere::{
     types::Atmosphere,
     bindings::atmosphere,
-}
+};
 
 // Mapping from view height (r) and zenith cos angle (mu) to UV coordinates in the transmittance LUT
 // Assuming r between ground and top atmosphere boundary, and mu= cos(zenith_angle)

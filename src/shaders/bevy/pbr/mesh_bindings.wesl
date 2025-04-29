@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::mesh_types::Mesh
+import bevy::pbr::mesh_types::Mesh;
 
 #ifndef MESHLET_MESH_MATERIAL_PASS
 #ifdef PER_OBJECT_BUFFER_BATCH_SIZE

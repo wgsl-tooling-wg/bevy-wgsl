@@ -1,8 +1,8 @@
 
 
-#import bevy_render::bindless::{bindless_samplers_filtering, bindless_textures_2d}
+import bevy::render::bindless::{bindless_samplers_filtering, bindless_textures_2d};
 
-#import bevy_pbr::{
+import bevy::pbr::{
     pbr_functions,
     pbr_functions::SampleBias,
     pbr_bindings,
@@ -13,23 +13,23 @@
     mesh_view_bindings::view,
     parallax_mapping::parallaxed_uv,
     lightmap::lightmap,
-}
+};
 
 #ifdef SCREEN_SPACE_AMBIENT_OCCLUSION
-#import bevy_pbr::mesh_view_bindings::screen_space_ambient_occlusion_texture
-#import bevy_pbr::ssao_utils::ssao_multibounce
+import bevy::pbr::mesh_view_bindings::screen_space_ambient_occlusion_texture;
+import bevy::pbr::ssao_utils::ssao_multibounce;
 #endif
 
 #ifdef MESHLET_MESH_MATERIAL_PASS
-#import bevy_pbr::meshlet_visibility_buffer_resolve::VertexOutput
+import bevy::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
 #else ifdef PREPASS_PIPELINE
-#import bevy_pbr::prepass_io::VertexOutput
+import bevy::pbr::prepass_io::VertexOutput;
 #else
-#import bevy_pbr::forward_io::VertexOutput
+import bevy::pbr::forward_io::VertexOutput;
 #endif
 
 #ifdef BINDLESS
-#import bevy_pbr::pbr_bindings::material_indices
+import bevy::pbr::pbr_bindings::material_indices;
 #endif  // BINDLESS
 
 // prepare a basic PbrInput from the vertex stage output, mesh binding and view binding

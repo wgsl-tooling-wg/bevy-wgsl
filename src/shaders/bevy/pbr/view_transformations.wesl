@@ -1,7 +1,7 @@
 
 
-#import bevy_pbr::mesh_view_bindings as view_bindings
-#import bevy_pbr::prepass_bindings
+import bevy::pbr::mesh_view_bindings as view_bindings;
+import bevy::pbr::prepass_bindings;
 
 /// World space:
 /// +y is up

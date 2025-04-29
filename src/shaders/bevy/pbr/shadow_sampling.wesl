@@ -1,11 +1,11 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     mesh_view_bindings as view_bindings,
     utils::interleaved_gradient_noise,
     utils,
-}
-#import bevy_render::maths::{orthonormalize, PI}
+};
+import bevy::render::maths::{orthonormalize, PI};
 
 // Do the lookup, using HW 2x2 PCF and comparison
 fn sample_shadow_map_hardware(light_local: vec2<f32>, depth: f32, array_index: i32) -> f32 {

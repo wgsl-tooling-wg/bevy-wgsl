@@ -1,10 +1,10 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     mesh_view_types::POINT_LIGHT_FLAGS_SPOT_LIGHT_Y_NEGATIVE,
     mesh_view_bindings as view_bindings,
-}
-#import bevy_render::maths::PI
+};
+import bevy::render::maths::PI;
 
 const LAYER_BASE: u32 = 0;
 const LAYER_CLEARCOAT: u32 = 1;

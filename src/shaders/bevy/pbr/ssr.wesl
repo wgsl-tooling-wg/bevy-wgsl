@@ -2,8 +2,8 @@
 
 
 
-#import bevy_core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput
-#import bevy_pbr::{
+import bevy::core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput;
+import bevy::pbr::{
     clustered_forward,
     lighting,
     lighting::{LAYER_BASE, LAYER_CLEARCOAT},
@@ -28,11 +28,11 @@
         position_world_to_ndc,
         position_world_to_view,
     },
-}
-#import bevy_render::view::View
+};
+import bevy::render::view::View;
 
 #ifdef ENVIRONMENT_MAP
-#import bevy_pbr::environment_map
+import bevy::pbr::environment_map;
 #endif
 
 // The texture representing the color framebuffer.

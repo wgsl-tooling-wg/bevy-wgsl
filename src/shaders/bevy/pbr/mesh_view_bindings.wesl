@@ -1,10 +1,10 @@
 
 
-#import bevy_pbr::mesh_view_types as types
-#import bevy_render::{
+import bevy::pbr::mesh_view_types as types;
+import bevy::render::{
     view::View,
     globals::Globals,
-}
+};
 
 @group(0) @binding(0) var<uniform> view: View;
 @group(0) @binding(1) var<uniform> lights: types::Lights;

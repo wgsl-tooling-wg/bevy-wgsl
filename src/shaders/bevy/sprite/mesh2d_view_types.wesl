@@ -1,4 +1,4 @@
 
 
-#import bevy_render::view
-#import bevy_render::globals
+import bevy::render::view;
+import bevy::render::globals;

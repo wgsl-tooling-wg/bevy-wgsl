@@ -1,13 +1,13 @@
 
 
-#import bevy_pbr::light_probe::query_light_probe
-#import bevy_pbr::mesh_view_bindings::{
+import bevy::pbr::light_probe::query_light_probe;
+import bevy::pbr::mesh_view_bindings::{
     irradiance_volumes,
     irradiance_volume,
     irradiance_volume_sampler,
     light_probes,
 };
-#import bevy_pbr::clustered_forward::ClusterableObjectIndexRanges
+import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
 
 #ifdef IRRADIANCE_VOLUMES_ARE_USABLE
 
@@ -68,6 +68,6 @@ fn irradiance_volume_light(
     // Use Valve's formula to sample.
     let NN = N * N;
     return (rgb_x * NN.x + rgb_y * NN.y + rgb_z * NN.z) * query_result.intensity;
-}
+};
 
 #endif  // IRRADIANCE_VOLUMES_ARE_USABLE

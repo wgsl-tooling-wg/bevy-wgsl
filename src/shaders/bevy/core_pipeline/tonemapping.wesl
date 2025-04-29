@@ -1,15 +1,15 @@
 
 
-#import bevy_render::{
+import bevy::render::{
     view::ColorGrading,
     color_operations::{hsv_to_rgb, rgb_to_hsv},
     maths::{PI_2, powsafe},
-}
+};
 
-#import bevy_core_pipeline::tonemapping_lut_bindings::{
+import bevy::core_pipeline::tonemapping_lut_bindings::{
     dt_lut_texture,
     dt_lut_sampler,
-}
+};
 
 // Half the size of the crossfade region between shadows and midtones and
 // between midtones and highlights. This value, 0.1, corresponds to 10% of the

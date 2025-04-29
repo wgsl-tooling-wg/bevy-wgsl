@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::rgb9e5
+import bevy::pbr::rgb9e5;
 
 // Generates a random u32 in range [0, u32::MAX].
 //

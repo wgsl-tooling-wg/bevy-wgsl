@@ -1,14 +1,14 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     mesh_view_bindings as bindings,
     utils::rand_f,
-}
+};
 
-#import bevy_render::{
+import bevy::render::{
    color_operations::hsv_to_rgb,
    maths::PI_2,
-}
+};
 
 // Offsets within the `cluster_offsets_and_counts` buffer for a single cluster.
 //

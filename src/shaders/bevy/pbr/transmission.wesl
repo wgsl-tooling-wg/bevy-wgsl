@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     lighting,
     prepass_utils,
     utils::interleaved_gradient_noise,
@@ -8,10 +8,10 @@
     mesh_view_bindings as view_bindings,
 };
 
-#import bevy_render::maths::PI
+import bevy::render::maths::PI;
 
 #ifdef TONEMAP_IN_SHADER
-#import bevy_core_pipeline::tonemapping::approximate_inverse_tone_mapping
+import bevy::core_pipeline::tonemapping::approximate_inverse_tone_mapping;
 #endif
 
 fn specular_transmissive_light(world_position: vec4<f32>, frag_coord: vec3<f32>, view_z: f32, N: vec3<f32>, V: vec3<f32>, F0: vec3<f32>, ior: f32, thickness: f32, perceptual_roughness: f32, specular_transmissive_color: vec3<f32>, transmitted_environment_light_specular: vec3<f32>) -> vec3<f32> {
@@ -55,7 +55,7 @@ fn specular_transmissive_light(world_position: vec4<f32>, frag_coord: vec3<f32>,
 
     // Calculate final color by applying fresnel multiplied specular transmissive color to a mix of background color and transmitted specular environment light
     return F * specular_transmissive_color * mix(transmitted_environment_light_specular, background_color.rgb, background_color.a);
-}
+};
 
 fn fetch_transmissive_background_non_rough(offset_position: vec2<f32>, frag_coord: vec3<f32>) -> vec4<f32> {
     var background_color = textureSampleLevel(

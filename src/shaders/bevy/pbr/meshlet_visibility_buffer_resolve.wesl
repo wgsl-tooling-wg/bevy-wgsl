@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     meshlet_bindings::{
         Meshlet,
         meshlet_visibility_buffer,
@@ -17,15 +17,15 @@
     mesh_functions::mesh_position_local_to_world,
     mesh_types::Mesh,
     view_transformations::{position_world_to_clip, frag_coord_to_ndc},
-}
-#import bevy_render::maths::{affine3_to_square, mat2x4_f32_to_mat3x3_unpack}
+};
+import bevy::render::maths::{affine3_to_square, mat2x4_f32_to_mat3x3_unpack};
 
 #ifdef PREPASS_FRAGMENT
 #ifdef MOTION_VECTOR_PREPASS
-#import bevy_pbr::{
+import bevy::pbr::{
     prepass_bindings::previous_view_uniforms,
     pbr_prepass_functions::calculate_motion_vector,
-}
+};
 #endif
 #endif
 

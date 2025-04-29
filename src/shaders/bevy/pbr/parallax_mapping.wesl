@@ -1,14 +1,14 @@
 
 
-#import bevy_render::bindless::{bindless_samplers_filtering, bindless_textures_2d}
+import bevy::render::bindless::{bindless_samplers_filtering, bindless_textures_2d};
 
-#import bevy_pbr::{
+import bevy::pbr::{
     pbr_bindings::{depth_map_texture, depth_map_sampler},
     mesh_bindings::mesh
-}
+};
 
 #ifdef BINDLESS
-#import bevy_pbr::pbr_bindings::material_indices
+import bevy::pbr::pbr_bindings::material_indices;
 #endif  // BINDLESS
 
 fn sample_depth_map(uv: vec2<f32>, material_bind_group_slot: u32) -> f32 {

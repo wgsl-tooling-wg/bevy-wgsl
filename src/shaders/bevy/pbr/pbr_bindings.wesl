@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::pbr_types::StandardMaterial
+import bevy::pbr::pbr_types::StandardMaterial;
 
 #ifdef BINDLESS
 struct StandardMaterialBindings {

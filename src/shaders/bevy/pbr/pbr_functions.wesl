@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::{
+import bevy::pbr::{
     pbr_types,
     pbr_bindings,
     mesh_view_bindings as view_bindings,
@@ -13,23 +13,23 @@
     ambient,
     irradiance_volume,
     mesh_types::{MESH_FLAGS_SHADOW_RECEIVER_BIT, MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT},
-}
-#import bevy_render::maths::{E, powsafe}
+};
+import bevy::render::maths::{E, powsafe};
 
 #ifdef MESHLET_MESH_MATERIAL_PASS
-#import bevy_pbr::meshlet_visibility_buffer_resolve::VertexOutput
+import bevy::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
 #else ifdef PREPASS_PIPELINE
-#import bevy_pbr::prepass_io::VertexOutput
+import bevy::pbr::prepass_io::VertexOutput;
 #else   // PREPASS_PIPELINE
-#import bevy_pbr::forward_io::VertexOutput
+import bevy::pbr::forward_io::VertexOutput;
 #endif  // PREPASS_PIPELINE
 
 #ifdef ENVIRONMENT_MAP
-#import bevy_pbr::environment_map
+import bevy::pbr::environment_map;
 #endif
 
 #ifdef TONEMAP_IN_SHADER
-#import bevy_core_pipeline::tonemapping::{tone_mapping, screen_space_dither}
+import bevy::core_pipeline::tonemapping::{tone_mapping, screen_space_dither};
 #endif
 
 

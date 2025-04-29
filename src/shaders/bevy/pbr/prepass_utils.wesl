@@ -1,6 +1,6 @@
 
 
-#import bevy_pbr::mesh_view_bindings as view_bindings
+import bevy::pbr::mesh_view_bindings as view_bindings;
 
 #ifdef DEPTH_PREPASS
 fn prepass_depth(frag_coord: vec4<f32>, sample_index: u32) -> f32 {

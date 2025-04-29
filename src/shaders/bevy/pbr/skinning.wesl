@@ -1,7 +1,7 @@
 
 
-#import bevy_pbr::mesh_types::SkinnedMesh
-#import bevy_pbr::mesh_bindings::mesh
+import bevy::pbr::mesh_types::SkinnedMesh;
+import bevy::pbr::mesh_bindings::mesh;
 
 #ifdef SKINNED
 

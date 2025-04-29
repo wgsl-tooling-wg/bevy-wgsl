@@ -16,13 +16,13 @@
 
 
 
-#import bevy_pbr::mesh_view_bindings::depth_prepass_texture
-#import bevy_pbr::view_transformations::{
+import bevy::pbr::mesh_view_bindings::depth_prepass_texture;
+import bevy::pbr::view_transformations::{
     direction_world_to_clip,
     ndc_to_uv,
     perspective_camera_near,
     position_world_to_ndc,
-}
+};
 
 // Allows us to sample from the depth buffer with bilinear filtering.
 @group(1) @binding(2) var depth_linear_sampler: sampler;
