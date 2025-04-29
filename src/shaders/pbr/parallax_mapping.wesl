@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::parallax_mapping
+
 
 #import bevy_render::bindless::{bindless_samplers_filtering, bindless_textures_2d}
 

@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::decal::forward
+
 
 #import bevy_pbr::{
     forward_io::VertexOutput,

@@ -1,4 +1,4 @@
-#define_import_path bevy_render::globals
+
 
 struct Globals {
     // The time since startup in seconds

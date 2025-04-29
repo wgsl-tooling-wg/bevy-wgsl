@@ -1,4 +1,4 @@
-#define_import_path bevy_core_pipeline::tonemapping
+
 
 #import bevy_render::{
     view::ColorGrading,

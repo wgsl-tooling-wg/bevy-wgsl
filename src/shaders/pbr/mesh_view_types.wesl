@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::mesh_view_types
+
 
 struct ClusterableObject {
     // For point lights: the lower-right 2x2 values of the projection matrix [2][2] [2][3] [3][2] [3][3]

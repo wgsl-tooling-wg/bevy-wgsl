@@ -1,4 +1,4 @@
-#define_import_path bevy_ui::ui_vertex_output
+
 
 // The Vertex output of the default vertex shader for the Ui Material pipeline.
 struct UiVertexOutput {

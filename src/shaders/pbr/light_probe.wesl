@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::light_probe
+
 
 #import bevy_pbr::clustered_forward
 #import bevy_pbr::clustered_forward::ClusterableObjectIndexRanges

@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::mesh_types
+
 
 struct Mesh {
     // Affine 4x3 matrices transposed to 3x4

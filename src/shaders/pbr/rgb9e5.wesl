@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::rgb9e5
+
 
 const RGB9E5_EXPONENT_BITS        = 5u;
 const RGB9E5_MANTISSA_BITS        = 9;

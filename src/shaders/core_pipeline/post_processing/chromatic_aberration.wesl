@@ -2,7 +2,7 @@
 //
 // This makes edges of objects turn into multicolored streaks.
 
-#define_import_path bevy_core_pipeline::post_processing::chromatic_aberration
+
 
 // See `bevy_core_pipeline::post_process::ChromaticAberration` for more
 // information on these fields.

@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::mesh_view_bindings
+
 
 #import bevy_pbr::mesh_view_types as types
 #import bevy_render::{

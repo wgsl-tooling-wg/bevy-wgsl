@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::irradiance_volume
+
 
 #import bevy_pbr::light_probe::query_light_probe
 #import bevy_pbr::mesh_view_bindings::{

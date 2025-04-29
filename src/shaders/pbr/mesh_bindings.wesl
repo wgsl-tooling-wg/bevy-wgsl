@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::mesh_bindings
+
 
 #import bevy_pbr::mesh_types::Mesh
 

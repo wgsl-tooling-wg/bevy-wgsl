@@ -10,7 +10,7 @@
 // `materials` is the bindless index table and `slot` is the index into that
 // table (which can be found in the `Mesh`).
 
-#define_import_path bevy_render::bindless
+
 
 #ifdef BINDLESS
 

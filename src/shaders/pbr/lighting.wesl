@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::lighting
+
 
 #import bevy_pbr::{
     mesh_view_types::POINT_LIGHT_FLAGS_SPOT_LIGHT_Y_NEGATIVE,

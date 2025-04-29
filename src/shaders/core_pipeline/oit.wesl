@@ -1,4 +1,4 @@
-#define_import_path bevy_core_pipeline::oit
+
 
 #import bevy_pbr::mesh_view_bindings::{view, oit_layers, oit_layer_ids, oit_settings}
 

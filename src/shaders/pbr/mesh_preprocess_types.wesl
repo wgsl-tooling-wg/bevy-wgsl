@@ -1,6 +1,6 @@
 // Types needed for GPU mesh uniform building.
 
-#define_import_path bevy_pbr::mesh_preprocess_types
+
 
 // Per-frame data that the CPU supplies to the GPU.
 struct MeshInput {

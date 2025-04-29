@@ -14,7 +14,7 @@
 // [`raymarch.hlsl`]:
 // https://gist.github.com/h3r2tic/9c8356bdaefbe80b1a22ae0aaee192db
 
-#define_import_path bevy_pbr::raymarch
+
 
 #import bevy_pbr::mesh_view_bindings::depth_prepass_texture
 #import bevy_pbr::view_transformations::{

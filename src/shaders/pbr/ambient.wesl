@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::ambient
+
 
 #import bevy_pbr::{
     lighting::{EnvBRDFApprox, F_AB},

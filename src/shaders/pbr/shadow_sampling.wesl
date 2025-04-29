@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::shadow_sampling
+
 
 #import bevy_pbr::{
     mesh_view_bindings as view_bindings,

@@ -1,4 +1,4 @@
-#define_import_path bevy_render::view
+
 
 struct ColorGrading {
     balance: mat3x3<f32>,

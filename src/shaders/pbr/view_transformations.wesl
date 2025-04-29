@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::view_transformations
+
 
 #import bevy_pbr::mesh_view_bindings as view_bindings
 #import bevy_pbr::prepass_bindings

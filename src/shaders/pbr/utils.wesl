@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::utils
+
 
 #import bevy_pbr::rgb9e5
 

@@ -1,4 +1,4 @@
-#define_import_path bevy_render::color_operations
+
 
 #import bevy_render::maths::FRAC_PI_3
 

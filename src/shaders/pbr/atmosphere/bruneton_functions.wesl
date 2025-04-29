@@ -53,7 +53,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
 
-#define_import_path bevy_pbr::atmosphere::bruneton_functions
+
 
 #import bevy_pbr::atmosphere::{
     types::Atmosphere,

@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::pbr_functions
+
 
 #import bevy_pbr::{
     pbr_types,

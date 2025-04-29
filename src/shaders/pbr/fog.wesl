@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::fog
+
 
 #import bevy_pbr::{
     mesh_view_bindings::fog,

@@ -1,4 +1,4 @@
-#define_import_path bevy_sprite::mesh2d_functions
+
 
 #import bevy_sprite::{
     mesh2d_view_bindings::view,

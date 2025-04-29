@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::forward_io
+
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,

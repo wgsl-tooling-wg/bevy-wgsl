@@ -26,7 +26,7 @@
 // Note that the order in which decals are returned is currently unpredictable,
 // though generally stable from frame to frame.
 
-#define_import_path bevy_pbr::decal::clustered
+
 
 #import bevy_pbr::clustered_forward
 #import bevy_pbr::clustered_forward::ClusterableObjectIndexRanges

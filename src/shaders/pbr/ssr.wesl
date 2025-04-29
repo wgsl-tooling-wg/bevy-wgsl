@@ -1,6 +1,6 @@
 // A postprocessing pass that performs screen-space reflections.
 
-#define_import_path bevy_pbr::ssr
+
 
 #import bevy_core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput
 #import bevy_pbr::{

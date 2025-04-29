@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::atmosphere::functions
+
 
 #import bevy_render::maths::{PI, HALF_PI, PI_2, fast_acos, fast_acos_4, fast_atan2}
 

@@ -1,4 +1,4 @@
-#define_import_path bevy_pbr::pbr_deferred_types
+
 
 #import bevy_pbr::{
     mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT,
