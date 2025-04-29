@@ -21,7 +21,7 @@ struct EnvironmentMapRadiances {
 // multiple light probes and one for the case in which only the view light probe
 // is present.
 
-#ifdef MULTIPLE_LIGHT_PROBES_IN_ARRAY
+@if(MULTIPLE_LIGHT_PROBES_IN_ARRAY)
 
 fn compute_radiances(
     input: LayerLightingInput,
@@ -67,9 +67,9 @@ fn compute_radiances(
     // If we're lightmapped, and we shouldn't accumulate diffuse light from the
     // environment map, note that.
     var enable_diffuse = !found_diffuse_indirect;
-#ifdef LIGHTMAP
+@if(LIGHTMAP)
     enable_diffuse = enable_diffuse && query_result.affects_lightmapped_mesh_diffuse;
-#endif  // LIGHTMAP
+// #endif  // LIGHTMAP
 
     if (enable_diffuse) {
         var irradiance_sample_dir = N;
@@ -100,7 +100,7 @@ fn compute_radiances(
     return radiances;
 }
 
-#else   // MULTIPLE_LIGHT_PROBES_IN_ARRAY
+@else // #else   // MULTIPLE_LIGHT_PROBES_IN_ARRAY
 
 fn compute_radiances(
     input: LayerLightingInput,
@@ -133,10 +133,10 @@ fn compute_radiances(
     // If we're lightmapped, and we shouldn't accumulate diffuse light from the
     // environment map, note that.
     var enable_diffuse = !found_diffuse_indirect;
-#ifdef LIGHTMAP
+@if(LIGHTMAP)
     enable_diffuse = enable_diffuse &&
         light_probes.view_environment_map_affects_lightmapped_mesh_diffuse;
-#endif  // LIGHTMAP
+// #endif  // LIGHTMAP
 
     if (enable_diffuse) {
         var irradiance_sample_dir = N;
@@ -167,9 +167,9 @@ fn compute_radiances(
     return radiances;
 }
 
-#endif  // MULTIPLE_LIGHT_PROBES_IN_ARRAY
+// #endif  // MULTIPLE_LIGHT_PROBES_IN_ARRAY
 
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
 
 // Adds the environment map light from the clearcoat layer to that of the base
 // layer.
@@ -204,7 +204,7 @@ fn environment_map_light_clearcoat(
     (*out).specular = (*out).specular * inv_Fc * inv_Fc + clearcoat_radiances.radiance * Fc;
 }
 
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
 fn environment_map_light(
     input: ptr<function, LightingInput>,
@@ -260,14 +260,14 @@ fn environment_map_light(
 
     out.specular = FssEss * radiances.radiance;
 
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     environment_map_light_clearcoat(
         &out,
         input,
         clusterable_object_index_ranges,
         found_diffuse_indirect,
     );
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     return out;
 }

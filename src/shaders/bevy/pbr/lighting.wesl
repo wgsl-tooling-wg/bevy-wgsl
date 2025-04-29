@@ -62,11 +62,11 @@ struct LayerLightingInput {
 // Input to a lighting function (`point_light`, `spot_light`,
 // `directional_light`).
 struct LightingInput {
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     layers: array<LayerLightingInput, 2>,
-#else   // STANDARD_MATERIAL_CLEARCOAT
+@else // #else   // STANDARD_MATERIAL_CLEARCOAT
     layers: array<LayerLightingInput, 1>,
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     // The world-space position.
     P: vec3<f32>,
@@ -87,12 +87,12 @@ struct LightingInput {
     // What we call `F_ab` they call `AB`.
     F_ab: vec2<f32>,
 
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     // The strength of the clearcoat layer.
     clearcoat_strength: f32,
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
-#ifdef STANDARD_MATERIAL_ANISOTROPY
+@if(STANDARD_MATERIAL_ANISOTROPY)
     // The anisotropy strength, reflecting the amount of increased roughness in
     // the tangent direction.
     anisotropy: f32,
@@ -102,7 +102,7 @@ struct LightingInput {
     // The bitangent direction, which is the cross product of the normal with
     // the tangent direction.
     Ba: vec3<f32>,
-#endif  // STANDARD_MATERIAL_ANISOTROPY
+// #endif  // STANDARD_MATERIAL_ANISOTROPY
 }
 
 // Values derived from the `LightingInput` for both diffuse and specular lights.
@@ -345,7 +345,7 @@ fn specular_clearcoat(
     return vec2(Fc, Frc);
 }
 
-#ifdef STANDARD_MATERIAL_ANISOTROPY
+@if(STANDARD_MATERIAL_ANISOTROPY)
 
 fn specular_anisotropy(
     input: ptr<function, LightingInput>,
@@ -385,7 +385,7 @@ fn specular_anisotropy(
     return Fr;
 }
 
-#endif  // STANDARD_MATERIAL_ANISOTROPY
+// #endif  // STANDARD_MATERIAL_ANISOTROPY
 
 // Diffuse BRDF
 // https://google.github.io/filament/Filament.html#materialsystem/diffusebrdf
@@ -470,15 +470,15 @@ fn point_light(
 
     let specular_intensity = specular_L_intensity.w;
 
-#ifdef STANDARD_MATERIAL_ANISOTROPY
+@if(STANDARD_MATERIAL_ANISOTROPY)
     let specular_light = specular_anisotropy(input, &specular_derived_input, L, specular_intensity);
-#else   // STANDARD_MATERIAL_ANISOTROPY
+@else // #else   // STANDARD_MATERIAL_ANISOTROPY
     let specular_light = specular(input, &specular_derived_input, specular_intensity);
-#endif  // STANDARD_MATERIAL_ANISOTROPY
+// #endif  // STANDARD_MATERIAL_ANISOTROPY
 
     // Clearcoat
 
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     // Unpack.
     let clearcoat_N = (*input).layers[LAYER_CLEARCOAT].N;
     let clearcoat_strength = (*input).clearcoat_strength;
@@ -506,7 +506,7 @@ fn point_light(
     );
     let inv_Fc = 1.0 - Fc_Frc.r;    // Inverse Fresnel term.
     let Frc = Fc_Frc.g;             // Clearcoat light.
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     // Diffuse.
     // Comes after specular since its N⋅L is used in the lighting equation.
@@ -530,14 +530,14 @@ fn point_light(
     // NOTE: (*light).color.rgb is premultiplied with (*light).intensity / 4 π (which would be the luminous intensity) on the CPU
 
     var color: vec3<f32>;
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     // Account for the Fresnel term from the clearcoat darkening the main layer.
     //
     // <https://google.github.io/filament/Filament.html#materialsystem/clearcoatmodel/integrationinthesurfaceresponse>
     color = (diffuse + specular_light * inv_Fc) * inv_Fc + Frc;
-#else   // STANDARD_MATERIAL_CLEARCOAT
+@else // #else   // STANDARD_MATERIAL_CLEARCOAT
     color = diffuse + specular_light;
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     return color * (*light).color_inverse_square_range.rgb *
         (rangeAttenuation * derived_input.NdotL);
@@ -593,13 +593,13 @@ fn directional_light(
         diffuse = diffuse_color * Fd_Burley(input, &derived_input);
     }
 
-#ifdef STANDARD_MATERIAL_ANISOTROPY
+@if(STANDARD_MATERIAL_ANISOTROPY)
     let specular_light = specular_anisotropy(input, &derived_input, L, 1.0);
-#else   // STANDARD_MATERIAL_ANISOTROPY
+@else // #else   // STANDARD_MATERIAL_ANISOTROPY
     let specular_light = specular(input, &derived_input, 1.0);
-#endif  // STANDARD_MATERIAL_ANISOTROPY
+// #endif  // STANDARD_MATERIAL_ANISOTROPY
 
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     let clearcoat_N = (*input).layers[LAYER_CLEARCOAT].N;
     let clearcoat_strength = (*input).clearcoat_strength;
 
@@ -612,18 +612,18 @@ fn directional_light(
         specular_clearcoat(input, &derived_clearcoat_input, clearcoat_strength, 1.0);
     let inv_Fc = 1.0 - Fc_Frc.r;
     let Frc = Fc_Frc.g;
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     var color: vec3<f32>;
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     // Account for the Fresnel term from the clearcoat darkening the main layer.
     //
     // <https://google.github.io/filament/Filament.html#materialsystem/clearcoatmodel/integrationinthesurfaceresponse>
     color = (diffuse + specular_light * inv_Fc) * inv_Fc * derived_input.NdotL +
         Frc * derived_clearcoat_input.NdotL;
-#else   // STANDARD_MATERIAL_CLEARCOAT
+@else // #else   // STANDARD_MATERIAL_CLEARCOAT
     color = (diffuse + specular_light) * derived_input.NdotL;
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     return color * (*light).color.rgb;
 }

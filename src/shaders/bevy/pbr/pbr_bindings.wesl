@@ -2,7 +2,7 @@
 
 import bevy::pbr::pbr_types::StandardMaterial;
 
-#ifdef BINDLESS
+@if(BINDLESS)
 struct StandardMaterialBindings {
     material: u32,                      // 0
     base_color_texture: u32,            // 1
@@ -40,7 +40,7 @@ struct StandardMaterialBindings {
 @group(2) @binding(0) var<storage> material_indices: array<StandardMaterialBindings>;
 @group(2) @binding(10) var<storage> material_array: array<StandardMaterial>;
 
-#else   // BINDLESS
+@else // #else   // BINDLESS
 
 @group(2) @binding(0) var<uniform> material: StandardMaterial;
 @group(2) @binding(1) var base_color_texture: texture_2d<f32>;
@@ -56,34 +56,34 @@ struct StandardMaterialBindings {
 @group(2) @binding(11) var depth_map_texture: texture_2d<f32>;
 @group(2) @binding(12) var depth_map_sampler: sampler;
 
-#ifdef PBR_ANISOTROPY_TEXTURE_SUPPORTED
+@if(PBR_ANISOTROPY_TEXTURE_SUPPORTED)
 @group(2) @binding(13) var anisotropy_texture: texture_2d<f32>;
 @group(2) @binding(14) var anisotropy_sampler: sampler;
-#endif  // PBR_ANISOTROPY_TEXTURE_SUPPORTED
+// #endif  // PBR_ANISOTROPY_TEXTURE_SUPPORTED
 
-#ifdef PBR_TRANSMISSION_TEXTURES_SUPPORTED
+@if(PBR_TRANSMISSION_TEXTURES_SUPPORTED)
 @group(2) @binding(15) var specular_transmission_texture: texture_2d<f32>;
 @group(2) @binding(16) var specular_transmission_sampler: sampler;
 @group(2) @binding(17) var thickness_texture: texture_2d<f32>;
 @group(2) @binding(18) var thickness_sampler: sampler;
 @group(2) @binding(19) var diffuse_transmission_texture: texture_2d<f32>;
 @group(2) @binding(20) var diffuse_transmission_sampler: sampler;
-#endif  // PBR_TRANSMISSION_TEXTURES_SUPPORTED
+// #endif  // PBR_TRANSMISSION_TEXTURES_SUPPORTED
 
-#ifdef PBR_MULTI_LAYER_MATERIAL_TEXTURES_SUPPORTED
+@if(PBR_MULTI_LAYER_MATERIAL_TEXTURES_SUPPORTED)
 @group(2) @binding(21) var clearcoat_texture: texture_2d<f32>;
 @group(2) @binding(22) var clearcoat_sampler: sampler;
 @group(2) @binding(23) var clearcoat_roughness_texture: texture_2d<f32>;
 @group(2) @binding(24) var clearcoat_roughness_sampler: sampler;
 @group(2) @binding(25) var clearcoat_normal_texture: texture_2d<f32>;
 @group(2) @binding(26) var clearcoat_normal_sampler: sampler;
-#endif  // PBR_MULTI_LAYER_MATERIAL_TEXTURES_SUPPORTED
+// #endif  // PBR_MULTI_LAYER_MATERIAL_TEXTURES_SUPPORTED
 
-#ifdef PBR_SPECULAR_TEXTURES_SUPPORTED
+@if(PBR_SPECULAR_TEXTURES_SUPPORTED)
 @group(2) @binding(27) var specular_texture: texture_2d<f32>;
 @group(2) @binding(28) var specular_sampler: sampler;
 @group(2) @binding(29) var specular_tint_texture: texture_2d<f32>;
 @group(2) @binding(30) var specular_tint_sampler: sampler;
-#endif  // PBR_SPECULAR_TEXTURES_SUPPORTED
+// #endif  // PBR_SPECULAR_TEXTURES_SUPPORTED
 
-#endif  // BINDLESS
+// #endif  // BINDLESS

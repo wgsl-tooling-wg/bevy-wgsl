@@ -12,7 +12,7 @@
 
 
 
-#ifdef BINDLESS
+@if(BINDLESS)
 
 // Binding 0 is the bindless index table.
 // Filtering samplers.
@@ -34,4 +34,4 @@
 // Cubemap array textures.
 @group(2) @binding(9) var bindless_textures_cube_array: binding_array<texture_cube_array<f32>>;
 
-#endif  // BINDLESS
+// #endif  // BINDLESS

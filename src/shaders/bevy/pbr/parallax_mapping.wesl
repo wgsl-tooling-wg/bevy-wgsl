@@ -7,9 +7,9 @@ import bevy::pbr::{
     mesh_bindings::mesh
 };
 
-#ifdef BINDLESS
+@if(BINDLESS)
 import bevy::pbr::pbr_bindings::material_indices;
-#endif  // BINDLESS
+// #endif  // BINDLESS
 
 fn sample_depth_map(uv: vec2<f32>, material_bind_group_slot: u32) -> f32 {
     // We use `textureSampleLevel` over `textureSample` because the wgpu DX12
@@ -23,13 +23,13 @@ fn sample_depth_map(uv: vec2<f32>, material_bind_group_slot: u32) -> f32 {
     // sample_depth_map in our loop.
     // See https://stackoverflow.com/questions/56581141/direct3d11-gradient-instruction-used-in-a-loop-with-varying-iteration-forcing
     return textureSampleLevel(
-#ifdef BINDLESS
+@if(BINDLESS)
         bindless_textures_2d[material_indices[material_bind_group_slot].depth_map_texture],
         bindless_samplers_filtering[material_indices[material_bind_group_slot].depth_map_sampler],
-#else   // BINDLESS
+@else // #else   // BINDLESS
         depth_map_texture,
         depth_map_sampler,
-#endif  // BINDLESS
+// #endif  // BINDLESS
         uv,
         0.0
     ).r;
@@ -84,7 +84,7 @@ fn parallaxed_uv(
         texture_depth = sample_depth_map(uv, material_bind_group_slot);
     }
 
-#ifdef RELIEF_MAPPING
+@if(RELIEF_MAPPING)
     // Relief Mapping
     // ==============
     // "Refine" the rough result from Steep Parallax Mapping
@@ -114,7 +114,7 @@ fn parallaxed_uv(
             current_layer_depth -= delta_depth;
         }
     }
-#else
+@else // #else
     // Parallax Occlusion mapping
     // ==========================
     // "Refine" Steep Parallax Mapping by interpolating between the
@@ -131,7 +131,7 @@ fn parallaxed_uv(
     uv = mix(uv, previous_uv, weight);
 
     current_layer_depth += mix(next_depth, previous_depth, weight);
-#endif
+// #endif
 
     // Note: `current_layer_depth` is not returned, but may be useful
     // for light computation later on in future improvements of the pbr shader.

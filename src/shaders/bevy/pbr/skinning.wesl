@@ -3,13 +3,13 @@
 import bevy::pbr::mesh_types::SkinnedMesh;
 import bevy::pbr::mesh_bindings::mesh;
 
-#ifdef SKINNED
+@if(SKINNED)
 
-#ifdef SKINS_USE_UNIFORM_BUFFERS
+@if(SKINS_USE_UNIFORM_BUFFERS)
 @group(1) @binding(1) var<uniform> joint_matrices: SkinnedMesh;
-#else   // SKINS_USE_UNIFORM_BUFFERS
+@else // #else   // SKINS_USE_UNIFORM_BUFFERS
 @group(1) @binding(1) var<storage> joint_matrices: array<mat4x4<f32>>;
-#endif  // SKINS_USE_UNIFORM_BUFFERS
+// #endif  // SKINS_USE_UNIFORM_BUFFERS
 
 // An array of matrices specifying the joint positions from the previous frame.
 //
@@ -17,29 +17,29 @@ import bevy::pbr::mesh_bindings::mesh;
 //
 // If this is the first frame, or we're otherwise prevented from using data from
 // the previous frame, this is simply the same as `joint_matrices` above.
-#ifdef SKINS_USE_UNIFORM_BUFFERS
+@if(SKINS_USE_UNIFORM_BUFFERS)
 @group(1) @binding(6) var<uniform> prev_joint_matrices: SkinnedMesh;
-#else   // SKINS_USE_UNIFORM_BUFFERS
+@else // #else   // SKINS_USE_UNIFORM_BUFFERS
 @group(1) @binding(6) var<storage> prev_joint_matrices: array<mat4x4<f32>>;
-#endif  // SKINS_USE_UNIFORM_BUFFERS
+// #endif  // SKINS_USE_UNIFORM_BUFFERS
 
 fn skin_model(
     indexes: vec4<u32>,
     weights: vec4<f32>,
     instance_index: u32,
 ) -> mat4x4<f32> {
-#ifdef SKINS_USE_UNIFORM_BUFFERS
+@if(SKINS_USE_UNIFORM_BUFFERS)
     return weights.x * joint_matrices.data[indexes.x]
         + weights.y * joint_matrices.data[indexes.y]
         + weights.z * joint_matrices.data[indexes.z]
         + weights.w * joint_matrices.data[indexes.w];
-#else   // SKINS_USE_UNIFORM_BUFFERS
+@else // #else   // SKINS_USE_UNIFORM_BUFFERS
     var skin_index = mesh[instance_index].current_skin_index;
     return weights.x * joint_matrices[skin_index + indexes.x]
         + weights.y * joint_matrices[skin_index + indexes.y]
         + weights.z * joint_matrices[skin_index + indexes.z]
         + weights.w * joint_matrices[skin_index + indexes.w];
-#endif  // SKINS_USE_UNIFORM_BUFFERS
+// #endif  // SKINS_USE_UNIFORM_BUFFERS
 }
 
 // Returns the skinned position of a vertex with the given weights from the
@@ -51,18 +51,18 @@ fn skin_prev_model(
     weights: vec4<f32>,
     instance_index: u32,
 ) -> mat4x4<f32> {
-#ifdef SKINS_USE_UNIFORM_BUFFERS
+@if(SKINS_USE_UNIFORM_BUFFERS)
     return weights.x * prev_joint_matrices.data[indexes.x]
         + weights.y * prev_joint_matrices.data[indexes.y]
         + weights.z * prev_joint_matrices.data[indexes.z]
         + weights.w * prev_joint_matrices.data[indexes.w];
-#else   // SKINS_USE_UNIFORM_BUFFERS
+@else // #else   // SKINS_USE_UNIFORM_BUFFERS
     let skin_index = mesh[instance_index].current_skin_index;
     return weights.x * prev_joint_matrices[skin_index + indexes.x]
         + weights.y * prev_joint_matrices[skin_index + indexes.y]
         + weights.z * prev_joint_matrices[skin_index + indexes.z]
         + weights.w * prev_joint_matrices[skin_index + indexes.w];
-#endif  // SKINS_USE_UNIFORM_BUFFERS
+// #endif  // SKINS_USE_UNIFORM_BUFFERS
 }
 
 fn inverse_transpose_3x3m(in: mat3x3<f32>) -> mat3x3<f32> {
@@ -92,4 +92,4 @@ fn skin_normals(
     );
 }
 
-#endif
+// #endif

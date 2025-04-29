@@ -1,6 +1,6 @@
 
 
-#ifdef MORPH_TARGETS
+@if(MORPH_TARGETS)
 
 import bevy::pbr::mesh_types::MorphWeights;;
 
@@ -9,7 +9,7 @@ import bevy::pbr::mesh_types::MorphWeights;;
 @group(1) @binding(7) var<uniform> prev_morph_weights: MorphWeights;
 
 // NOTE: Those are the "hardcoded" values found in `MorphAttributes` struct
-// in crates/bevy_render/src/mesh/morph/visitors.rs
+// in crates/bevy::render/src/mesh/morph/visitors.rs
 // In an ideal world, the offsets are established dynamically and passed as #defines
 // to the shader, but it's out of scope for the initial implementation of morph targets.
 const position_offset: u32 = 0u;
@@ -49,4 +49,4 @@ fn morph(vertex_index: u32, component_offset: u32, weight_index: u32) -> vec3<f3
     );
 }
 
-#endif // MORPH_TARGETS
+// #endif // MORPH_TARGETS

@@ -53,7 +53,7 @@ struct ClusteredDecalIterator {
     world_position: vec3<f32>,
 }
 
-#ifdef CLUSTERED_DECALS_ARE_USABLE
+@if(CLUSTERED_DECALS_ARE_USABLE)
 
 // Creates a new iterator over the decals at the current fragment.
 //
@@ -117,7 +117,7 @@ fn clustered_decal_iterator_next(iterator: ptr<function, ClusteredDecalIterator>
     return false;
 }
 
-#endif  // CLUSTERED_DECALS_ARE_USABLE
+// #endif  // CLUSTERED_DECALS_ARE_USABLE
 
 // Returns the view-space Z coordinate for the given world position.
 fn get_view_z(world_position: vec3<f32>) -> f32 {
@@ -147,7 +147,7 @@ fn apply_decal_base_color(
 ) -> vec4<f32> {
     var base_color = initial_base_color;
 
-#ifdef CLUSTERED_DECALS_ARE_USABLE
+@if(CLUSTERED_DECALS_ARE_USABLE)
     // Fetch the clusterable object index ranges for this world position.
 
     let view_z = get_view_z(world_position);
@@ -176,7 +176,7 @@ fn apply_decal_base_color(
             base_color.a + decal_base_color.a
         );
     }
-#endif  // CLUSTERED_DECALS_ARE_USABLE
+// #endif  // CLUSTERED_DECALS_ARE_USABLE
 
     return base_color;
 }

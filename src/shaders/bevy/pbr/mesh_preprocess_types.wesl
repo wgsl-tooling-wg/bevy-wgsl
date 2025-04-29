@@ -54,13 +54,13 @@ struct IndirectParametersCpuMetadata {
 
 struct IndirectParametersGpuMetadata {
     mesh_index: u32,
-#ifdef WRITE_INDIRECT_PARAMETERS_METADATA
+@if(WRITE_INDIRECT_PARAMETERS_METADATA)
     early_instance_count: atomic<u32>,
     late_instance_count: atomic<u32>,
-#else   // WRITE_INDIRECT_PARAMETERS_METADATA
+@else // #else   // WRITE_INDIRECT_PARAMETERS_METADATA
     early_instance_count: u32,
     late_instance_count: u32,
-#endif  // WRITE_INDIRECT_PARAMETERS_METADATA
+// #endif  // WRITE_INDIRECT_PARAMETERS_METADATA
 }
 
 struct IndirectBatchSet {

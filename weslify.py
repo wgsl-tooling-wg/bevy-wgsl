@@ -46,22 +46,25 @@ def transform_preproc(source: str) -> str:
         spaces = ' ' * indent
         line = lines[i].strip()
         
-        if re.match(r'#else(\s*//.+)?', line):
-            transformed_lines.append(f'{spaces}@else')
-        
-        elif re.match(r'#endif(\s*//.+)?', line):
-            pass
-        
-        elif m := re.match(r'#ifdef (\w+)', line):
-            transformed_lines.append(f'{spaces}@if({m.group(1)})')
+        if m := re.match(r'#ifdef (\w+)', line):
+            transformed_lines.append(f'{spaces}@if({m.group(1)}) // {line}')
         
         elif m := re.match(r'#ifndef (\w+)', line):
-            transformed_lines.append(f'{spaces}@if(!{m.group(1)})')
+            transformed_lines.append(f'{spaces}@if(!{m.group(1)}) // {line}')
             pass
         
-        elif line.startswith('#'):
-            print(f'[WARN] unrecognized preproc: {line}')
-            transformed_lines.append(f'{spaces}// TODO unrecognized preproc: {line}')
+        elif m := re.match(r'#else ifdef (\w+)', line):
+            transformed_lines.append(f'{spaces}@elif({m.group(1)}) // {line}')
+        
+        elif m := re.match(r'#else', line):
+            transformed_lines.append(f'{spaces}@else // {line}')
+        
+        elif re.match(r'#endif', line):
+            transformed_lines.append(f'{spaces}// {line}')
+        
+        # elif line.startswith('#'):
+        #     print(f'[WARN] unrecognized preproc: {line}')
+        #     transformed_lines.append(f'{spaces}// TODO unrecognized preproc: {line}')
         
         else:
             transformed_lines.append(lines[i])
@@ -78,4 +81,6 @@ if __name__ == '__main__':
         print(f'Converting file {file}')
         source = Path(file).read_text()
         source = transform_imports(source)
+        source = transform_preproc(source)
+        source = source.replace('bevy_', 'bevy::')
         Path(file).write_text(source)

@@ -11,9 +11,9 @@ import bevy::pbr::{
     pbr_types,
 };
 
-#ifdef BINDLESS
+@if(BINDLESS)
 import bevy::pbr::pbr_bindings::material_indices;
-#endif  // BINDLESS
+// #endif  // BINDLESS
 
 // Cutoff used for the premultiplied alpha modes BLEND, ADD, and ALPHA_TO_COVERAGE.
 const PREMULTIPLIED_ALPHA_CUTOFF = 0.05;
@@ -21,52 +21,52 @@ const PREMULTIPLIED_ALPHA_CUTOFF = 0.05;
 // We can use a simplified version of alpha_discard() here since we only need to handle the alpha_cutoff
 fn prepass_alpha_discard(in: VertexOutput) {
 
-#ifdef MAY_DISCARD
-#ifdef BINDLESS
+@if(MAY_DISCARD)
+@if(BINDLESS)
     let slot = mesh[in.instance_index].material_and_lightmap_bind_group_slot & 0xffffu;
     var output_color: vec4<f32> = pbr_bindings::material_array[material_indices[slot].material].base_color;
     let flags = pbr_bindings::material_array[material_indices[slot].material].flags;
-#else   // BINDLESS
+@else // #else   // BINDLESS
     var output_color: vec4<f32> = pbr_bindings::material.base_color;
     let flags = pbr_bindings::material.flags;
-#endif  // BINDLESS
+// #endif  // BINDLESS
 
-#ifdef VERTEX_UVS
-#ifdef STANDARD_MATERIAL_BASE_COLOR_UV_B
+@if(VERTEX_UVS)
+@if(STANDARD_MATERIAL_BASE_COLOR_UV_B)
     var uv = in.uv_b;
-#else   // STANDARD_MATERIAL_BASE_COLOR_UV_B
+@else // #else   // STANDARD_MATERIAL_BASE_COLOR_UV_B
     var uv = in.uv;
-#endif  // STANDARD_MATERIAL_BASE_COLOR_UV_B
+// #endif  // STANDARD_MATERIAL_BASE_COLOR_UV_B
 
-#ifdef BINDLESS
+@if(BINDLESS)
     let uv_transform = pbr_bindings::material_array[material_indices[slot].material].uv_transform;
-#else   // BINDLESS
+@else // #else   // BINDLESS
     let uv_transform = pbr_bindings::material.uv_transform;
-#endif  // BINDLESS
+// #endif  // BINDLESS
 
     uv = (uv_transform * vec3(uv, 1.0)).xy;
     if (flags & pbr_types::STANDARD_MATERIAL_FLAGS_BASE_COLOR_TEXTURE_BIT) != 0u {
         output_color = output_color * textureSampleBias(
-#ifdef BINDLESS
+@if(BINDLESS)
             bindless_textures_2d[material_indices[slot].base_color_texture],
             bindless_samplers_filtering[material_indices[slot].base_color_sampler],
-#else   // BINDLESS
+@else // #else   // BINDLESS
             pbr_bindings::base_color_texture,
             pbr_bindings::base_color_sampler,
-#endif  // BINDLESS
+// #endif  // BINDLESS
             uv,
             view.mip_bias
         );
     }
-#endif // VERTEX_UVS
+// #endif // VERTEX_UVS
 
     let alpha_mode = flags & pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_RESERVED_BITS;
     if alpha_mode == pbr_types::STANDARD_MATERIAL_FLAGS_ALPHA_MODE_MASK {
-#ifdef BINDLESS
+@if(BINDLESS)
         let alpha_cutoff = pbr_bindings::material_array[material_indices[slot].material].alpha_cutoff;
-#else   // BINDLESS
+@else // #else   // BINDLESS
         let alpha_cutoff = pbr_bindings::material.alpha_cutoff;
-#endif  // BINDLESS
+// #endif  // BINDLESS
         if output_color.a < alpha_cutoff {
             discard;
         }
@@ -82,10 +82,10 @@ fn prepass_alpha_discard(in: VertexOutput) {
         }
     }
 
-#endif // MAY_DISCARD
+// #endif // MAY_DISCARD
 }
 
-#ifdef MOTION_VECTOR_PREPASS
+@if(MOTION_VECTOR_PREPASS)
 fn calculate_motion_vector(world_position: vec4<f32>, previous_world_position: vec4<f32>) -> vec2<f32> {
     let clip_position_t = view.unjittered_clip_from_world * world_position;
     let clip_position = clip_position_t.xy / clip_position_t.w;
@@ -99,4 +99,4 @@ fn calculate_motion_vector(world_position: vec4<f32>, previous_world_position: v
     // down where clip space y goes up, so y needs to be flipped.
     return (clip_position - previous_clip_position) * vec2(0.5, -0.5);
 }
-#endif // MOTION_VECTOR_PREPASS
+// #endif // MOTION_VECTOR_PREPASS

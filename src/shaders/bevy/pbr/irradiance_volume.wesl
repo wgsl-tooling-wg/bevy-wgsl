@@ -9,7 +9,7 @@ import bevy::pbr::mesh_view_bindings::{
 };
 import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
 
-#ifdef IRRADIANCE_VOLUMES_ARE_USABLE
+@if(IRRADIANCE_VOLUMES_ARE_USABLE)
 
 // See:
 // https://advances.realtimerendering.com/s2006/Mitchell-ShadingInValvesSourceEngine.pdf
@@ -33,17 +33,17 @@ fn irradiance_volume_light(
 
     // If we're lightmapped, and the irradiance volume contributes no diffuse
     // light, then bail out.
-#ifdef LIGHTMAP
+@if(LIGHTMAP)
     if (!query_result.affects_lightmapped_mesh_diffuse) {
         return vec3(0.0f);
     }
-#endif  // LIGHTMAP
+// #endif  // LIGHTMAP
 
-#ifdef MULTIPLE_LIGHT_PROBES_IN_ARRAY
+@if(MULTIPLE_LIGHT_PROBES_IN_ARRAY)
     let irradiance_volume_texture = irradiance_volumes[query_result.texture_index];
-#else
+@else // #else
     let irradiance_volume_texture = irradiance_volume;
-#endif
+// #endif
 
     let atlas_resolution = vec3<f32>(textureDimensions(irradiance_volume_texture));
     let resolution = vec3<f32>(textureDimensions(irradiance_volume_texture) / vec3(1u, 2u, 3u));
@@ -70,4 +70,4 @@ fn irradiance_volume_light(
     return (rgb_x * NN.x + rgb_y * NN.y + rgb_z * NN.z) * query_result.intensity;
 };
 
-#endif  // IRRADIANCE_VOLUMES_ARE_USABLE
+// #endif  // IRRADIANCE_VOLUMES_ARE_USABLE

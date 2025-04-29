@@ -91,7 +91,7 @@ fn query_light_probe(
     return result;
 }
 
-#else   // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
+@else // #else   // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
 
 // Searches for a light probe that contains the fragment.
 //
@@ -151,4 +151,4 @@ fn query_light_probe(
     return result;
 }
 
-#endif  // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3
+// #endif  // AVAILABLE_STORAGE_BUFFER_BINDINGS >= 3

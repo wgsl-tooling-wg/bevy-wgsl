@@ -50,16 +50,16 @@ struct DrawIndirectArgs {
 
 const CENTIMETERS_PER_METER = 100.0;
 
-#ifdef MESHLET_FILL_CLUSTER_BUFFERS_PASS
+@if(MESHLET_FILL_CLUSTER_BUFFERS_PASS)
 var<push_constant> scene_instance_count: u32;
 @group(0) @binding(0) var<storage, read> meshlet_instance_meshlet_counts: array<u32>; // Per entity instance
 @group(0) @binding(1) var<storage, read> meshlet_instance_meshlet_slice_starts: array<u32>; // Per entity instance
 @group(0) @binding(2) var<storage, read_write> meshlet_cluster_instance_ids: array<u32>; // Per cluster
 @group(0) @binding(3) var<storage, read_write> meshlet_cluster_meshlet_ids: array<u32>; // Per cluster
 @group(0) @binding(4) var<storage, read_write> meshlet_global_cluster_count: atomic<u32>; // Single object shared between all workgroups
-#endif
+// #endif
 
-#ifdef MESHLET_CULLING_PASS
+@if(MESHLET_CULLING_PASS)
 struct Constants { scene_cluster_count: u32, meshlet_raster_cluster_rightmost_slot: u32 }
 var<push_constant> constants: Constants;
 @group(0) @binding(0) var<storage, read> meshlet_cluster_meshlet_ids: array<u32>; // Per cluster
@@ -88,9 +88,9 @@ fn cluster_is_second_pass_candidate(cluster_id: u32) -> bool {
     let bit_offset = cluster_id % 32u;
     return bool(extractBits(packed_candidates, bit_offset, 1u));
 }
-#endif
+// #endif
 
-#ifdef MESHLET_VISIBILITY_BUFFER_RASTER_PASS
+@if(MESHLET_VISIBILITY_BUFFER_RASTER_PASS)
 @group(0) @binding(0) var<storage, read> meshlet_cluster_meshlet_ids: array<u32>; // Per cluster
 @group(0) @binding(1) var<storage, read> meshlets: array<Meshlet>; // Per meshlet
 @group(0) @binding(2) var<storage, read> meshlet_indices: array<u32>; // Many per meshlet
@@ -99,11 +99,11 @@ fn cluster_is_second_pass_candidate(cluster_id: u32) -> bool {
 @group(0) @binding(5) var<storage, read> meshlet_instance_uniforms: array<Mesh>; // Per entity instance
 @group(0) @binding(6) var<storage, read> meshlet_raster_clusters: array<u32>; // Single object shared between all workgroups
 @group(0) @binding(7) var<storage, read> meshlet_software_raster_cluster_count: u32;
-#ifdef MESHLET_VISIBILITY_BUFFER_RASTER_PASS_OUTPUT
+@if(MESHLET_VISIBILITY_BUFFER_RASTER_PASS_OUTPUT)
 @group(0) @binding(8) var meshlet_visibility_buffer: texture_storage_2d<r64uint, atomic>;
-#else
+@else // #else
 @group(0) @binding(8) var meshlet_visibility_buffer: texture_storage_2d<r32uint, atomic>;
-#endif
+// #endif
 @group(0) @binding(9) var<uniform> view: View;
 
 // TODO: Load only twice, instead of 3x in cases where you load 3 indices per thread?
@@ -146,9 +146,9 @@ fn get_meshlet_vertex_position(meshlet: ptr<function, Meshlet>, vertex_id: u32) 
 
     return vertex_position;
 }
-#endif
+// #endif
 
-#ifdef MESHLET_MESH_MATERIAL_PASS
+@if(MESHLET_MESH_MATERIAL_PASS)
 @group(1) @binding(0) var meshlet_visibility_buffer: texture_storage_2d<r64uint, read>;
 @group(1) @binding(1) var<storage, read> meshlet_cluster_meshlet_ids: array<u32>; // Per cluster
 @group(1) @binding(2) var<storage, read> meshlets: array<Meshlet>; // Per meshlet
@@ -208,4 +208,4 @@ fn get_meshlet_vertex_normal(meshlet: ptr<function, Meshlet>, vertex_id: u32) ->
 fn get_meshlet_vertex_uv(meshlet: ptr<function, Meshlet>, vertex_id: u32) -> vec2<f32> {
     return meshlet_vertex_uvs[(*meshlet).start_vertex_attribute_id + vertex_id];
 }
-#endif
+// #endif

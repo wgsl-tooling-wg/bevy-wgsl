@@ -31,9 +31,9 @@ import bevy::pbr::{
 };
 import bevy::render::view::View;
 
-#ifdef ENVIRONMENT_MAP
+@if(ENVIRONMENT_MAP)
 import bevy::pbr::environment_map;
-#endif
+// #endif
 
 // The texture representing the color framebuffer.
 @group(1) @binding(0) var color_texture: texture_2d<f32>;
@@ -119,7 +119,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     // the ray missed. Otherwise, it only takes the diffuse part.
     //
     // TODO: Merge this with the duplicated code in `apply_pbr_lighting`.
-#ifdef ENVIRONMENT_MAP
+@if(ENVIRONMENT_MAP)
     // Unpack values required for environment mapping.
     let base_color = pbr_input.material.base_color.rgb;
     let metallic = pbr_input.material.metallic;
@@ -128,7 +128,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     let diffuse_transmission = pbr_input.material.diffuse_transmission;
     let diffuse_occlusion = pbr_input.diffuse_occlusion;
 
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     // Do the above calculations again for the clearcoat layer. Remember that
     // the clearcoat can have its own roughness and its own normal.
     let clearcoat = pbr_input.material.clearcoat;
@@ -137,7 +137,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     let clearcoat_N = pbr_input.clearcoat_N;
     let clearcoat_NdotV = max(dot(clearcoat_N, pbr_input.V), 0.0001);
     let clearcoat_R = reflect(-pbr_input.V, clearcoat_N);
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     // Calculate various other values needed for environment mapping.
     let roughness = lighting::perceptualRoughnessToRoughness(perceptual_roughness);
@@ -163,14 +163,14 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     lighting_input.diffuse_color = diffuse_color;
     lighting_input.F0_ = F0;
     lighting_input.F_ab = F_ab;
-#ifdef STANDARD_MATERIAL_CLEARCOAT
+@if(STANDARD_MATERIAL_CLEARCOAT)
     lighting_input.layers[LAYER_CLEARCOAT].NdotV = clearcoat_NdotV;
     lighting_input.layers[LAYER_CLEARCOAT].N = clearcoat_N;
     lighting_input.layers[LAYER_CLEARCOAT].R = clearcoat_R;
     lighting_input.layers[LAYER_CLEARCOAT].perceptual_roughness = clearcoat_perceptual_roughness;
     lighting_input.layers[LAYER_CLEARCOAT].roughness = clearcoat_roughness;
     lighting_input.clearcoat_strength = clearcoat;
-#endif  // STANDARD_MATERIAL_CLEARCOAT
+// #endif  // STANDARD_MATERIAL_CLEARCOAT
 
     // Determine which cluster we're in. We'll need this to find the right
     // reflection probe.
@@ -187,7 +187,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     indirect_light += view.exposure *
         (environment_light.diffuse * diffuse_occlusion +
         environment_light.specular * specular_occlusion);
-#endif
+// #endif
 
     // Write the results.
     return vec4(fragment.rgb + indirect_light, 1.0);

@@ -20,18 +20,18 @@ import bevy::pbr::{
 };
 import bevy::render::maths::{affine3_to_square, mat2x4_f32_to_mat3x3_unpack};
 
-#ifdef PREPASS_FRAGMENT
-#ifdef MOTION_VECTOR_PREPASS
+@if(PREPASS_FRAGMENT)
+@if(MOTION_VECTOR_PREPASS)
 import bevy::pbr::{
     prepass_bindings::previous_view_uniforms,
     pbr_prepass_functions::calculate_motion_vector,
 };
-#endif
-#endif
+// #endif
+// #endif
 
 /// Functions to be used by materials for reading from a meshlet visibility buffer texture.
 
-#ifdef MESHLET_MESH_MATERIAL_PASS
+@if(MESHLET_MESH_MATERIAL_PASS)
 struct PartialDerivatives {
     barycentrics: vec3<f32>,
     ddx: vec3<f32>,
@@ -95,11 +95,11 @@ struct VertexOutput {
     mesh_flags: u32,
     cluster_id: u32,
     material_bind_group_slot: u32,
-#ifdef PREPASS_FRAGMENT
-#ifdef MOTION_VECTOR_PREPASS
+@if(PREPASS_FRAGMENT)
+@if(MOTION_VECTOR_PREPASS)
     motion_vector: vec2<f32>,
-#endif
-#endif
+// #endif
+// #endif
 }
 
 /// Load the visibility buffer texture and resolve it into a VertexOutput.
@@ -152,16 +152,16 @@ fn resolve_vertex_output(frag_coord: vec4<f32>) -> VertexOutput {
 
     let world_tangent = calculate_world_tangent(world_normal, ddx_world_position, ddy_world_position, ddx_uv, ddy_uv);
 
-#ifdef PREPASS_FRAGMENT
-#ifdef MOTION_VECTOR_PREPASS
+@if(PREPASS_FRAGMENT)
+@if(MOTION_VECTOR_PREPASS)
     let previous_world_from_local = affine3_to_square(instance_uniform.previous_world_from_local);
     let previous_world_position_0 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_0.position, 1.0));
     let previous_world_position_1 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_1.position, 1.0));
     let previous_world_position_2 = mesh_position_local_to_world(previous_world_from_local, vec4(vertex_2.position, 1.0));
     let previous_world_position = mat3x4(previous_world_position_0, previous_world_position_1, previous_world_position_2) * partial_derivatives.barycentrics;
     let motion_vector = calculate_motion_vector(world_position, previous_world_position);
-#endif
-#endif
+// #endif
+// #endif
 
     return VertexOutput(
         frag_coord,
@@ -174,11 +174,11 @@ fn resolve_vertex_output(frag_coord: vec4<f32>) -> VertexOutput {
         instance_uniform.flags,
         instance_id ^ meshlet_id,
         instance_uniform.material_and_lightmap_bind_group_slot & 0xffffu,
-#ifdef PREPASS_FRAGMENT
-#ifdef MOTION_VECTOR_PREPASS
+@if(PREPASS_FRAGMENT)
+@if(MOTION_VECTOR_PREPASS)
         motion_vector,
-#endif
-#endif
+// #endif
+// #endif
     );
 }
 
@@ -237,4 +237,4 @@ fn calculate_world_tangent(
 
     return vec4(world_tangent, -w); // TODO: Unclear why we need to negate this to match mikktspace generated tangents
 }
-#endif
+// #endif

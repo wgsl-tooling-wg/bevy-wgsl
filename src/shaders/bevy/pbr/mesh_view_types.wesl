@@ -48,7 +48,7 @@ const DIRECTIONAL_LIGHT_FLAGS_VOLUMETRIC_BIT: u32                       = 2u;
 const DIRECTIONAL_LIGHT_FLAGS_AFFECTS_LIGHTMAPPED_MESH_DIFFUSE_BIT: u32 = 4u;
 
 struct Lights {
-    // NOTE: this array size must be kept in sync with the constants defined in bevy_pbr/src/render/light.rs
+    // NOTE: this array size must be kept in sync with the constants defined in bevy::pbr/src/render/light.rs
     directional_lights: array<DirectionalLight, #{MAX_DIRECTIONAL_LIGHTS}u>,
     ambient_color: vec4<f32>,
     // x/y/z dimensions and n_clusters in w
@@ -105,7 +105,7 @@ struct ClusterLightIndexLists {
 struct ClusterOffsetsAndCounts {
     data: array<array<vec4<u32>, 2>>,
 };
-#else
+@else // #else
 struct ClusterableObjects {
     data: array<ClusterableObject, 204u>,
 };
@@ -118,7 +118,7 @@ struct ClusterOffsetsAndCounts {
     // and an 8-bit count of the number of lights in the low 8 bits
     data: array<vec4<u32>, 1024u>,
 };
-#endif
+// #endif
 
 struct LightProbe {
     // This is stored as the transpose in order to save space in this structure.
@@ -152,7 +152,7 @@ struct LightProbes {
 // Settings for screen space reflections.
 //
 // For more information on these settings, see the documentation for
-// `bevy_pbr::ssr::ScreenSpaceReflections`.
+// `bevy::pbr::ssr::ScreenSpaceReflections`.
 struct ScreenSpaceReflectionsSettings {
     perceptual_roughness_threshold: f32,
     thickness: f32,
