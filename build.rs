@@ -1,6 +1,6 @@
 fn main() {
     wesl::PkgBuilder::new("bevy")
-        .scan_directory("src/shaders")
+        .scan_directory("src/shaders/bevy")
         .expect("failed to scan WESL files")
         .validate()
         .map_err(|e| eprintln!("{e}"))

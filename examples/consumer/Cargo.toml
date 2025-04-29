@@ -9,6 +9,3 @@ wesl = "0.1.2"
 
 [build-dependencies]
 wesl = { version = "0.1.2", features = ["package"] }
-
-[patch.crates-io]
-wesl = { path = "../../../wesl-rs/crates/wesl"}
