@@ -125,7 +125,7 @@ fn mesh_tangent_local_to_world(world_from_local: mat4x4<f32>, vertex_tangent: ve
 @if(VISIBILITY_RANGE_DITHER)
 fn get_visibility_range_dither_level(instance_index: u32, world_position: vec4<f32>) -> i32 {
     // If we're using a storage buffer, then the length is variable.
-    @if(AVAILABLE_STORAGE_BUFFER_BINDINGS >= 6)
+    @if(AVAILABLE_STORAGE_BUFFER_BINDINGS__GE_6)
     let visibility_buffer_array_len = arrayLength(&visibility_ranges);
     // If we're using a uniform buffer, then the length is constant
     @else
