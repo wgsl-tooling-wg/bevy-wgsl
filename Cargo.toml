@@ -9,7 +9,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-wesl = "0.1.2"
+wesl = { version = "0.1.2", features = ["naga_ext"] }
 
 [build-dependencies]
 wesl = { version = "0.1.2", features = ["package", "naga_ext"] }

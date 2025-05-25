@@ -72,7 +72,7 @@ const VISIBILITY_RANGE_UNIFORM_BUFFER_SIZE: u32 = 64u;
 @group(0) @binding(21) var irradiance_volumes: binding_array<texture_3d<f32>, 8u>;
 @elif(IRRADIANCE_VOLUMES_ARE_USABLE)
 @group(0) @binding(21) var irradiance_volume: texture_3d<f32>;
-@else
+@if(IRRADIANCE_VOLUMES_ARE_USABLE)
 @group(0) @binding(22) var irradiance_volume_sampler: sampler;
 
 @if(CLUSTERED_DECALS_ARE_USABLE)
@@ -91,19 +91,19 @@ const VISIBILITY_RANGE_UNIFORM_BUFFER_SIZE: u32 = 64u;
 @if(MULTISAMPLED && DEPTH_PREPASS)
 @group(0) @binding(28) var depth_prepass_texture: texture_depth_multisampled_2d;
 
-@elif(MULTISAMPLED && NORMAL_PREPASS)
+@if(MULTISAMPLED && NORMAL_PREPASS)
 @group(0) @binding(29) var normal_prepass_texture: texture_multisampled_2d<f32>;
 
-@elif(MULTISAMPLED && MOTION_VECTOR_PREPASS)
+@if(MULTISAMPLED && MOTION_VECTOR_PREPASS)
 @group(0) @binding(30) var motion_vector_prepass_texture: texture_multisampled_2d<f32>;
 
 @elif(DEPTH_PREPASS)
 @group(0) @binding(28) var depth_prepass_texture: texture_depth_2d;
 
-@elif(NORMAL_PREPASS)
+@if(NORMAL_PREPASS)
 @group(0) @binding(29) var normal_prepass_texture: texture_2d<f32>;
 
-@elif(MOTION_VECTOR_PREPASS)
+@if(MOTION_VECTOR_PREPASS)
 @group(0) @binding(30) var motion_vector_prepass_texture: texture_2d<f32>;
 
 @if(DEFERRED_PREPASS)

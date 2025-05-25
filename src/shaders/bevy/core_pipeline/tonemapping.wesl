@@ -1,5 +1,3 @@
-
-
 import bevy::render::{
     view::ColorGrading,
     color_operations::{hsv_to_rgb, rgb_to_hsv},
@@ -57,7 +55,7 @@ fn ycbcr_to_rgb(col: vec3<f32>) -> vec3<f32> {
 }
 
 fn tonemap_curve(v: f32) -> f32 {
-    @if(0) {
+    @if(false) {
         // Large linear part in the lows, but compresses highs.
         let c = v + v * v + 0.5 * v * v * v;
         return c / (1.0 + c);
