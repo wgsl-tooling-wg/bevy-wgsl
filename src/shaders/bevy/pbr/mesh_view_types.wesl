@@ -1,5 +1,3 @@
-
-
 struct ClusterableObject {
     // For point lights: the lower-right 2x2 values of the projection matrix [2][2] [2][3] [3][2] [3][3]
     // For spot lights: the direction (x,z), spot_scale and spot_offset

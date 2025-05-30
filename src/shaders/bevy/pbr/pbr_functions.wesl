@@ -845,9 +845,7 @@ fn main_pass_post_lighting_processing(
     var output_color = input_color;
 
     // fog
-    @if(DISTANCE_FOG) {
-        
-    }
+    @if(DISTANCE_FOG)
     if ((pbr_input.material.flags & pbr_types::STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT) != 0u) {
         output_color = apply_fog(view_bindings::fog, output_color, pbr_input.world_position.xyz, view_bindings::view.world_position.xyz);
     }

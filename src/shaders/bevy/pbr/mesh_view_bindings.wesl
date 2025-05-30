@@ -97,13 +97,13 @@ const VISIBILITY_RANGE_UNIFORM_BUFFER_SIZE: u32 = 64u;
 @if(MULTISAMPLED && MOTION_VECTOR_PREPASS)
 @group(0) @binding(30) var motion_vector_prepass_texture: texture_multisampled_2d<f32>;
 
-@elif(DEPTH_PREPASS)
+@if(!MULTISAMPLED && DEPTH_PREPASS)
 @group(0) @binding(28) var depth_prepass_texture: texture_depth_2d;
 
-@if(NORMAL_PREPASS)
+@if(!MULTISAMPLED && NORMAL_PREPASS)
 @group(0) @binding(29) var normal_prepass_texture: texture_2d<f32>;
 
-@if(MOTION_VECTOR_PREPASS)
+@if(!MULTISAMPLED && MOTION_VECTOR_PREPASS)
 @group(0) @binding(30) var motion_vector_prepass_texture: texture_2d<f32>;
 
 @if(DEFERRED_PREPASS)
