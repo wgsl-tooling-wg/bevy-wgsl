@@ -319,6 +319,10 @@ fn specular(
 // the second channel.
 //
 // <https://google.github.io/filament/Filament.html#listing_clearcoatbrdf>
+// TODO(mbr): wesl.lower() revealed that this function contains UB when STANDARD_MATERIAL_CLEARCOAT
+// is unset, because input.layers[1] is out of bounds. Naga will not pass validation if we replace
+// LAYER_CLEARCOAT with its value (1u). So I added the @if here.
+@if(STANDARD_MATERIAL_CLEARCOAT)
 fn specular_clearcoat(
     input: ptr<function, LightingInput>,
     derived_input: ptr<function, DerivedLightingInput>,

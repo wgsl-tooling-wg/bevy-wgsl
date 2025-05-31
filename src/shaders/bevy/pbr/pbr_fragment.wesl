@@ -161,12 +161,12 @@ fn pbr_input_from_standard_material(
     if ((material.flags & pbr_types::STANDARD_MATERIAL_FLAGS_BASE_COLOR_TEXTURE_BIT) != 0u) {
         // TODO(mbr): see refactor here: https://github.com/wgsl-tooling-wg/wesl-spec/issues/63
         @if(BINDLESS)
-        let texture = pbr_bindings::base_color_texture[slot];
+        let texture = bindless_textures_2d[material_indices[slot].base_color_texture];
         @else 
         let texture = pbr_bindings::base_color_texture;
 
         @if(BINDLESS)
-        let sampler_ = pbr_bindings::base_color_sampler[slot];
+        let sampler_ = bindless_samplers_filtering[material_indices[slot].base_color_sampler];
         @else
         let sampler_ = pbr_bindings::base_color_sampler;
 
