@@ -1,5 +1,5 @@
 [workspace]
-members = ["examples/consumer"]
+members = ["examples/consumer", "examples/builder"]
 resolver = "3"
 
 [package]
@@ -12,7 +12,7 @@ edition = "2024"
 wesl = { version = "0.1.2", features = ["naga_ext"] }
 
 [build-dependencies]
-wesl = { version = "0.1.2", features = ["package", "naga_ext"] }
+wesl = { version = "0.1.2", features = ["package", "naga_ext", "eval"] }
 
 [patch.crates-io]
 wesl = { path = "../wesl-rs/crates/wesl" }
