@@ -54,8 +54,7 @@
 // THE POSSIBILITY OF SUCH DAMAGE.
 
 
-
-import bevy::pbr::atmosphere::{
+import package::pbr::atmosphere::{
     types::Atmosphere,
     bindings::atmosphere,
 };

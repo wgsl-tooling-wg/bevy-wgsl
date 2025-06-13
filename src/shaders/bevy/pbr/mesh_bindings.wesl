@@ -1,4 +1,4 @@
-import bevy::pbr::mesh_types::Mesh;
+import package::pbr::mesh_types::Mesh;
 
 // TODO(mbr): not sure about the else, did it match both if conditions?
 @if(!MESHLET_MESH_MATERIAL_PASS && PER_OBJECT_BUFFER_BATCH_SIZE)

@@ -1,4 +1,4 @@
-import bevy::pbr::{
+import package::pbr::{
     pbr_types,
     pbr_bindings,
     mesh_view_bindings as view_bindings,
@@ -12,20 +12,20 @@ import bevy::pbr::{
     irradiance_volume,
     mesh_types::{MESH_FLAGS_SHADOW_RECEIVER_BIT, MESH_FLAGS_TRANSMITTED_SHADOW_RECEIVER_BIT},
 };
-import bevy::render::maths::{E, powsafe};
+import package::render::maths::{E, powsafe};
 
 @if(MESHLET_MESH_MATERIAL_PASS)
-import bevy::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
+import package::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
 @elif(PREPASS_PIPELINE)
-import bevy::pbr::prepass_io::VertexOutput;
+import package::pbr::prepass_io::VertexOutput;
 @else 
-import bevy::pbr::forward_io::VertexOutput;
+import package::pbr::forward_io::VertexOutput;
 
 @if(ENVIRONMENT_MAP)
-import bevy::pbr::environment_map;
+import package::pbr::environment_map;
 
 @if(TONEMAP_IN_SHADER)
-import bevy::core_pipeline::tonemapping::{tone_mapping, screen_space_dither};
+import package::core_pipeline::tonemapping::{tone_mapping, screen_space_dither};
 
 
 // Biasing info needed to sample from a texture. How this is done depends on
@@ -722,7 +722,7 @@ fn apply_pbr_lighting(
             attenuation_fog.be = pow(1.0 - in.material.attenuation_color.rgb, vec3<f32>(E)) / in.material.attenuation_distance;
             // TODO: Add the subsurface scattering factor below
             // attenuation_fog.bi = /* ... */
-            transmitted_light = bevy::pbr::fog::atmospheric_fog(
+            transmitted_light = package::pbr::fog::atmospheric_fog(
                 attenuation_fog, vec4<f32>(transmitted_light, 1.0), thickness,
                 vec3<f32>(0.0) // TODO: Pass in (pre-attenuated) scattered light contribution here
             ).rgb;
@@ -773,13 +773,13 @@ fn apply_fog(fog_params: mesh_view_types::Fog, input_color: vec4<f32>, fragment_
     }
 
     if fog_params.mode == mesh_view_types::FOG_MODE_LINEAR {
-        return bevy::pbr::fog::linear_fog(fog_params, input_color, distance, scattering);
+        return package::pbr::fog::linear_fog(fog_params, input_color, distance, scattering);
     } else if fog_params.mode == mesh_view_types::FOG_MODE_EXPONENTIAL {
-        return bevy::pbr::fog::exponential_fog(fog_params, input_color, distance, scattering);
+        return package::pbr::fog::exponential_fog(fog_params, input_color, distance, scattering);
     } else if fog_params.mode == mesh_view_types::FOG_MODE_EXPONENTIAL_SQUARED {
-        return bevy::pbr::fog::exponential_squared_fog(fog_params, input_color, distance, scattering);
+        return package::pbr::fog::exponential_squared_fog(fog_params, input_color, distance, scattering);
     } else if fog_params.mode == mesh_view_types::FOG_MODE_ATMOSPHERIC {
-        return bevy::pbr::fog::atmospheric_fog(fog_params, input_color, distance, scattering);
+        return package::pbr::fog::atmospheric_fog(fog_params, input_color, distance, scattering);
     } else {
         return input_color;
     }

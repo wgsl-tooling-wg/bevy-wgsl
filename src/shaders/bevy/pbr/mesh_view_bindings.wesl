@@ -1,5 +1,5 @@
-import bevy::pbr::mesh_view_types as types;
-import bevy::render::{
+import package::pbr::mesh_view_types as types;
+import package::render::{
     view::View,
     globals::Globals,
 };

@@ -1,5 +1,3 @@
-
-
 struct VertexOutput {
     // this is `clip position` when the struct is used as a vertex stage output 
     // and `frag coord` when used as a fragment stage input

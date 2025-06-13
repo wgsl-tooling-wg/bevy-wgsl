@@ -1,13 +1,11 @@
-
-
-import bevy::pbr::light_probe::query_light_probe;
-import bevy::pbr::mesh_view_bindings::{
+import package::pbr::light_probe::query_light_probe;
+import package::pbr::mesh_view_bindings::{
     irradiance_volumes,
     irradiance_volume,
     irradiance_volume_sampler,
     light_probes,
 };
-import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
+import package::pbr::clustered_forward::ClusterableObjectIndexRanges;
 
 @if(IRRADIANCE_VOLUMES_ARE_USABLE)
 

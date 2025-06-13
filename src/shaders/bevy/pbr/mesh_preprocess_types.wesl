@@ -1,7 +1,6 @@
 // Types needed for GPU mesh uniform building.
 
 
-
 // Per-frame data that the CPU supplies to the GPU.
 struct MeshInput {
     // The model transform.

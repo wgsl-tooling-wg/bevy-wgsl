@@ -28,10 +28,10 @@
 
 
 
-import bevy::pbr::clustered_forward;
-import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
-import bevy::pbr::mesh_view_bindings;
-import bevy::render::maths;
+import package::pbr::clustered_forward;
+import package::pbr::clustered_forward::ClusterableObjectIndexRanges;
+import package::pbr::mesh_view_bindings;
+import package::render::maths;
 
 // An object that allows stepping through all clustered decals that affect a
 // single fragment.

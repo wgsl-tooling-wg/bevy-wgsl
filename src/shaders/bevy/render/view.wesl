@@ -1,5 +1,3 @@
-
-
 struct ColorGrading {
     balance: mat3x3<f32>,
     saturation: vec3<f32>,

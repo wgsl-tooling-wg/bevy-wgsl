@@ -1,5 +1,3 @@
-
-
 // The Vertex output of the default vertex shader for the Ui Material pipeline.
 struct UiVertexOutput {
     @location(0) uv: vec2<f32>,

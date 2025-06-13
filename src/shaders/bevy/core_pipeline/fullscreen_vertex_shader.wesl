@@ -1,5 +1,3 @@
-
-
 struct FullscreenVertexOutput {
     @builtin(position)
     position: vec4<f32>,

@@ -1,7 +1,7 @@
-import bevy::pbr::mesh_types::Mesh;
-import bevy::render::view::View;
-import bevy::pbr::prepass_bindings::PreviousViewUniforms;
-import bevy::pbr::utils::octahedral_decode_signed;
+import package::pbr::mesh_types::Mesh;
+import package::render::view::View;
+import package::pbr::prepass_bindings::PreviousViewUniforms;
+import package::pbr::utils::octahedral_decode_signed;
 
 struct Meshlet {
     start_vertex_position_bit: u32,

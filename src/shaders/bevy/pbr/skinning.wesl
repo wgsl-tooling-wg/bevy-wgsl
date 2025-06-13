@@ -1,5 +1,5 @@
-import bevy::pbr::mesh_types::SkinnedMesh;
-import bevy::pbr::mesh_bindings::mesh;
+import package::pbr::mesh_types::SkinnedMesh;
+import package::pbr::mesh_bindings::mesh;
 
 @if(SKINNED && SKINS_USE_UNIFORM_BUFFERS)
 @group(1) @binding(1) var<uniform> joint_matrices: SkinnedMesh;

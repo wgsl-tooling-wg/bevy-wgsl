@@ -1,6 +1,4 @@
-
-
-import bevy::render::maths::FRAC_PI_3;
+import package::render::maths::FRAC_PI_3;
 
 // Converts HSV to RGB.
 //

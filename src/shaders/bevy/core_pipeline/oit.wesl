@@ -1,6 +1,4 @@
-
-
-import bevy::pbr::mesh_view_bindings::{view, oit_layers, oit_layer_ids, oit_settings};
+import package::pbr::mesh_view_bindings::{view, oit_layers, oit_layer_ids, oit_settings};
 
 // Add the fragment to the oit buffer
 @if(OIT_ENABLED)
@@ -29,7 +27,7 @@ fn oit_draw(position: vec4f, color: vec4f) {
 
     // get the layer_index from the screen
     let layer_index = screen_index + layer_id * buffer_size;
-    let rgb9e5_color = bevy::pbr::rgb9e5::vec3_to_rgb9e5_(color.rgb);
+    let rgb9e5_color = package::pbr::rgb9e5::vec3_to_rgb9e5_(color.rgb);
     let depth_alpha = pack_24bit_depth_8bit_alpha(position.z, color.a);
     oit_layers[layer_index] = vec2(rgb9e5_color, depth_alpha);
 }

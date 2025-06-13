@@ -1,6 +1,4 @@
-
-
-import bevy::pbr::{
+import package::pbr::{
     mesh_types::MESH_FLAGS_SHADOW_RECEIVER_BIT,
     pbr_types::{STANDARD_MATERIAL_FLAGS_FOG_ENABLED_BIT, STANDARD_MATERIAL_FLAGS_UNLIT_BIT},
 };

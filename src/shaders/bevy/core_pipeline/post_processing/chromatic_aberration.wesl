@@ -3,8 +3,7 @@
 // This makes edges of objects turn into multicolored streaks.
 
 
-
-// See `bevy::core_pipeline::post_process::ChromaticAberration` for more
+// See `package::core_pipeline::post_process::ChromaticAberration` for more
 // information on these fields.
 struct ChromaticAberrationSettings {
     intensity: f32,

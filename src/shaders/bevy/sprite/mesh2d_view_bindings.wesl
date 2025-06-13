@@ -1,7 +1,5 @@
-
-
-import bevy::render::view::View;
-import bevy::render::globals::Globals;
+import package::render::view::View;
+import package::render::globals::Globals;
 
 @group(0) @binding(0) var<uniform> view: View;
 

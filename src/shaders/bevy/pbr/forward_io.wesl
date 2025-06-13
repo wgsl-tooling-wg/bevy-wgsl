@@ -1,5 +1,3 @@
-
-
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
 @if(VERTEX_POSITIONS)

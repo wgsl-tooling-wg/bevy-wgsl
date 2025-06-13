@@ -1,6 +1,4 @@
-
-
-import bevy::pbr::{
+import package::pbr::{
     mesh_view_types::POINT_LIGHT_FLAGS_SPOT_LIGHT_Y_NEGATIVE,
     mesh_view_bindings as view_bindings,
     shadow_sampling::{
@@ -9,7 +7,7 @@ import bevy::pbr::{
     }
 };
 
-import bevy::render::{
+import package::render::{
     color_operations::hsv_to_rgb,
     maths::PI_2
 };

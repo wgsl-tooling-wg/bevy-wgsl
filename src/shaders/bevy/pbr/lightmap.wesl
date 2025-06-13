@@ -1,4 +1,4 @@
-import bevy::pbr::mesh_bindings::mesh;
+import package::pbr::mesh_bindings::mesh;
 
 @if(MULTIPLE_LIGHTMAPS_IN_ARRAY)
 @group(1) @binding(4) var lightmaps_textures: binding_array<texture_2d<f32>, 4>;

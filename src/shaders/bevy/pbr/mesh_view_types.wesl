@@ -46,7 +46,7 @@ const DIRECTIONAL_LIGHT_FLAGS_VOLUMETRIC_BIT: u32                       = 2u;
 const DIRECTIONAL_LIGHT_FLAGS_AFFECTS_LIGHTMAPPED_MESH_DIFFUSE_BIT: u32 = 4u;
 
 struct Lights {
-    // NOTE: this array size must be kept in sync with the constants defined in bevy::pbr/src/render/light.rs
+    // NOTE: this array size must be kept in sync with the constants defined in bevy/pbr/src/render/light.rs
     directional_lights: array<DirectionalLight, u32(constants::MAX_DIRECTIONAL_LIGHTS)>,
     ambient_color: vec4<f32>,
     // x/y/z dimensions and n_clusters in w
@@ -154,7 +154,7 @@ struct LightProbes {
 // Settings for screen space reflections.
 //
 // For more information on these settings, see the documentation for
-// `bevy::pbr::ssr::ScreenSpaceReflections`.
+// `package::pbr::ssr::ScreenSpaceReflections`.
 struct ScreenSpaceReflectionsSettings {
     perceptual_roughness_threshold: f32,
     thickness: f32,

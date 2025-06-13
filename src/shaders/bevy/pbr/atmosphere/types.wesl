@@ -1,5 +1,3 @@
-
-
 struct Atmosphere {
     // Radius of the planet
     bottom_radius: f32, // units: m

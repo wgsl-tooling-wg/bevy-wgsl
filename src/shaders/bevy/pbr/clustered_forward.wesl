@@ -1,11 +1,9 @@
-
-
-import bevy::pbr::{
+import package::pbr::{
     mesh_view_bindings as bindings,
     utils::rand_f,
 };
 
-import bevy::render::{
+import package::render::{
    color_operations::hsv_to_rgb,
    maths::PI_2,
 };
@@ -33,7 +31,7 @@ struct ClusterableObjectIndexRanges {
     last_clusterable_object_index_offset: u32,
 }
 
-// NOTE: Keep in sync with bevy::pbr/src/light.rs
+// NOTE: Keep in sync with bevy/pbr/src/light.rs
 fn view_z_to_z_slice(view_z: f32, is_orthographic: bool) -> u32 {
     var z_slice: u32 = 0u;
     if is_orthographic {

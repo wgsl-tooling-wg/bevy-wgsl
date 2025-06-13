@@ -1,8 +1,6 @@
+import package::render::maths::{PI, HALF_PI, PI_2, fast_acos, fast_acos_4, fast_atan2};
 
-
-import bevy::render::maths::{PI, HALF_PI, PI_2, fast_acos, fast_acos_4, fast_atan2};
-
-import bevy::pbr::atmosphere::{
+import package::pbr::atmosphere::{
     types::Atmosphere,
     bindings::{
         atmosphere, settings, view, lights, transmittance_lut, transmittance_lut_sampler, 

@@ -1,5 +1,3 @@
-
-
 struct Globals {
     // The time since startup in seconds
     // Wraps to 0 after 1 hour.

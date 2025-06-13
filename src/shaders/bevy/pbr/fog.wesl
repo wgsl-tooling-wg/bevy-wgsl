@@ -1,6 +1,4 @@
-
-
-import bevy::pbr::{
+import package::pbr::{
     mesh_view_bindings::fog,
     mesh_view_types::Fog,
 };

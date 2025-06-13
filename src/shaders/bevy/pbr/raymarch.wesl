@@ -15,9 +15,8 @@
 // https://gist.github.com/h3r2tic/9c8356bdaefbe80b1a22ae0aaee192db
 
 
-
-import bevy::pbr::mesh_view_bindings::depth_prepass_texture;
-import bevy::pbr::view_transformations::{
+import package::pbr::mesh_view_bindings::depth_prepass_texture;
+import package::pbr::view_transformations::{
     direction_world_to_clip,
     ndc_to_uv,
     perspective_camera_near,

@@ -1,6 +1,6 @@
-import bevy::render::bindless::{bindless_samplers_filtering, bindless_textures_2d};
+import package::render::bindless::{bindless_samplers_filtering, bindless_textures_2d};
 
-import bevy::pbr::{
+import package::pbr::{
     pbr_functions,
     pbr_functions::SampleBias,
     pbr_bindings,
@@ -14,19 +14,19 @@ import bevy::pbr::{
 };
 
 @if(SCREEN_SPACE_AMBIENT_OCCLUSION)
-import bevy::pbr::mesh_view_bindings::screen_space_ambient_occlusion_texture;
+import package::pbr::mesh_view_bindings::screen_space_ambient_occlusion_texture;
 @if(SCREEN_SPACE_AMBIENT_OCCLUSION)
-import bevy::pbr::ssao_utils::ssao_multibounce;
+import package::pbr::ssao_utils::ssao_multibounce;
 
 @if(MESHLET_MESH_MATERIAL_PASS)
-import bevy::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
+import package::pbr::meshlet_visibility_buffer_resolve::VertexOutput;
 @elif(PREPASS_PIPELINE)
-import bevy::pbr::prepass_io::VertexOutput;
+import package::pbr::prepass_io::VertexOutput;
 @else
-import bevy::pbr::forward_io::VertexOutput;
+import package::pbr::forward_io::VertexOutput;
 
 @if(BINDLESS)
-import bevy::pbr::pbr_bindings::material_indices;
+import package::pbr::pbr_bindings::material_indices;
 
 // prepare a basic PbrInput from the vertex stage output, mesh binding and view binding
 fn pbr_input_from_vertex_output(

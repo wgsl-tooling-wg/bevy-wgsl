@@ -1,7 +1,7 @@
-import bevy::pbr::clustered_forward;
-import bevy::pbr::clustered_forward::ClusterableObjectIndexRanges;
-import bevy::pbr::mesh_view_bindings::light_probes;
-import bevy::pbr::mesh_view_types::LightProbe;
+import package::pbr::clustered_forward;
+import package::pbr::clustered_forward::ClusterableObjectIndexRanges;
+import package::pbr::mesh_view_bindings::light_probes;
+import package::pbr::mesh_view_types::LightProbe;
 
 // The result of searching for a light probe.
 struct LightProbeQueryResult {

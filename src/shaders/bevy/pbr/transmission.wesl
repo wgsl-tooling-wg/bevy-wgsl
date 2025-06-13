@@ -1,4 +1,4 @@
-import bevy::pbr::{
+import package::pbr::{
     lighting,
     prepass_utils,
     utils::interleaved_gradient_noise,
@@ -6,10 +6,10 @@ import bevy::pbr::{
     mesh_view_bindings as view_bindings,
 };
 
-import bevy::render::maths::PI;
+import package::render::maths::PI;
 
 @if(TONEMAP_IN_SHADER)
-import bevy::core_pipeline::tonemapping::approximate_inverse_tone_mapping;
+import package::core_pipeline::tonemapping::approximate_inverse_tone_mapping;
 
 fn specular_transmissive_light(world_position: vec4<f32>, frag_coord: vec3<f32>, view_z: f32, N: vec3<f32>, V: vec3<f32>, F0: vec3<f32>, ior: f32, thickness: f32, perceptual_roughness: f32, specular_transmissive_color: vec3<f32>, transmitted_environment_light_specular: vec3<f32>) -> vec3<f32> {
     // Calculate the ratio between refraction indexes. Assume air/vacuum for the space outside the mesh

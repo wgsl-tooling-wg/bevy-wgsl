@@ -1,10 +1,10 @@
-import bevy::render::{
+import package::render::{
     view::ColorGrading,
     color_operations::{hsv_to_rgb, rgb_to_hsv},
     maths::{PI_2, powsafe},
 };
 
-import bevy::core_pipeline::tonemapping_lut_bindings::{
+import package::core_pipeline::tonemapping_lut_bindings::{
     dt_lut_texture,
     dt_lut_sampler,
 };
