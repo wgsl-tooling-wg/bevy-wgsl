@@ -1,12 +1,20 @@
-use std::{path::Path, time::Instant};
+use std::{
+    path::{Path, PathBuf},
+    time::Instant,
+};
 
 fn main() {
     println!("compiling package...");
 
     let start = Instant::now();
 
+    // must be run from examples/builder folder.
+    let path = Path::new("../../src/shaders/bevy");
+    // .canonicalize()
+    // .expect("input path not found");
+
     let pkg = wesl::PkgBuilder::new("bevy")
-        .scan_directory("../../src/shaders/bevy")
+        .scan_directory(&path)
         .expect("failed to scan WESL files");
 
     let pkg_end = Instant::now();
@@ -28,7 +36,9 @@ fn main() {
     let duration = codegen_end - pkg_end;
     println!("codegen done in {} ms", duration.as_millis());
 
-    let mut path = Path::new(".").canonicalize().expect("invalid file path");
+    let mut path = Path::new(".")
+        .canonicalize()
+        .expect("invalid output file path");
     path.push("codegen.rs");
     std::fs::write(&path, file).expect("failed to write file");
 
