@@ -4,7 +4,7 @@ use wesl::Feature;
 
 fn main() {
     let source = wesl::Wesl::new("src/shaders")
-        .add_package(&bevy_wgsl::bevy::Mod)
+        .add_package(&bevy_wgsl::bevy::PACKAGE)
         .add_constants([
             ("MAX_CASCADES_PER_LIGHT", 10.0),
             ("MAX_DIRECTIONAL_LIGHTS", 10.0),
