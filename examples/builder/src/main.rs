@@ -14,7 +14,7 @@ fn main() {
     // .expect("input path not found");
 
     let pkg = wesl::PkgBuilder::new("bevy")
-        .scan_directory(&path)
+        .scan_root(&path)
         .expect("failed to scan WESL files");
 
     let pkg_end = Instant::now();
