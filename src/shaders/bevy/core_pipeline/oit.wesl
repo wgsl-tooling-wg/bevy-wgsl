@@ -1,7 +1,11 @@
 import package::pbr::mesh_view_bindings::{view, oit_layers, oit_layer_ids, oit_settings};
 
+@if(!OIT_ENABLED)
+const module_requires_flag_OIT_ENABLED = false;
+@if(!OIT_ENABLED)
+const_assert module_requires_flag_OIT_ENABLED; // module requires feature flag OIT_ENABLED
+
 // Add the fragment to the oit buffer
-@if(OIT_ENABLED)
 fn oit_draw(position: vec4f, color: vec4f) {
     // Don't add fully transparent fragments to the list
     // because we don't want to have to sort them in the resolve pass

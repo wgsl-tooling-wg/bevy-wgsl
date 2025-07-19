@@ -33,6 +33,11 @@ import package::pbr::clustered_forward::ClusterableObjectIndexRanges;
 import package::pbr::mesh_view_bindings;
 import package::render::maths;
 
+@if(!CLUSTERED_DECALS_ARE_USABLE)
+const module_requires_flag_CLUSTERED_DECALS_ARE_USABLE = false;
+@if(!CLUSTERED_DECALS_ARE_USABLE)
+const_assert module_requires_flag_CLUSTERED_DECALS_ARE_USABLE; // module requires feature flag CLUSTERED_DECALS_ARE_USABLE
+
 // An object that allows stepping through all clustered decals that affect a
 // single fragment.
 struct ClusteredDecalIterator {
@@ -53,7 +58,6 @@ struct ClusteredDecalIterator {
     world_position: vec3<f32>,
 }
 
-@if(CLUSTERED_DECALS_ARE_USABLE)
 
 // Creates a new iterator over the decals at the current fragment.
 //
@@ -117,7 +121,6 @@ fn clustered_decal_iterator_next(iterator: ptr<function, ClusteredDecalIterator>
     return false;
 }
 
-// #endif  // CLUSTERED_DECALS_ARE_USABLE
 
 // Returns the view-space Z coordinate for the given world position.
 fn get_view_z(world_position: vec3<f32>) -> f32 {
@@ -140,6 +143,9 @@ fn view_is_orthographic() -> bool {
 // Returns the new base color with decals taken into account. If no decals
 // overlap the current world position, returns the supplied base color
 // unmodified.
+// 
+// TODO(mbr): I feature-gated this.
+// It used to work without the CLUSTERED_DECALS_ARE_USABLE flag.
 fn apply_decal_base_color(
     world_position: vec3<f32>,
     frag_coord: vec2<f32>,
@@ -147,7 +153,6 @@ fn apply_decal_base_color(
 ) -> vec4<f32> {
     var base_color = initial_base_color;
 
-@if(CLUSTERED_DECALS_ARE_USABLE)
     // Fetch the clusterable object index ranges for this world position.
 
     let view_z = get_view_z(world_position);
@@ -176,7 +181,6 @@ fn apply_decal_base_color(
             base_color.a + decal_base_color.a
         );
     }
-// #endif  // CLUSTERED_DECALS_ARE_USABLE
 
     return base_color;
 }

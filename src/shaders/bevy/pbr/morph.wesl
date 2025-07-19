@@ -1,5 +1,9 @@
-@if(MORPH_TARGETS)
-import package::pbr::mesh_types::MorphWeights;;
+import package::pbr::mesh_types::MorphWeights;
+
+@if(!MORPH_TARGETS)
+const module_requires_flag_MORPH_TARGETS = false;
+@if(!MORPH_TARGETS)
+const_assert module_requires_flag_MORPH_TARGETS; // module requires feature flag MORPH_TARGETS
 
 @group(1) @binding(2) var<uniform> morph_weights: MorphWeights;
 @group(1) @binding(3) var morph_targets: texture_3d<f32>;
@@ -45,5 +49,3 @@ fn morph(vertex_index: u32, component_offset: u32, weight_index: u32) -> vec3<f3
         morph_pixel(vertex_index, component_offset + 2u, weight_index),
     );
 }
-
-// #endif // MORPH_TARGETS

@@ -1,3 +1,4 @@
+@if(BINDLESS)
 import package::render::bindless::{bindless_samplers_filtering, bindless_textures_2d};
 
 import package::pbr::{

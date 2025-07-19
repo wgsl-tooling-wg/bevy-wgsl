@@ -7,11 +7,11 @@ import package::pbr::mesh_view_bindings::{
 };
 import package::pbr::clustered_forward::ClusterableObjectIndexRanges;
 
-@if(IRRADIANCE_VOLUMES_ARE_USABLE)
 
 // See:
 // https://advances.realtimerendering.com/s2006/Mitchell-ShadingInValvesSourceEngine.pdf
 // Slide 28, "Ambient Cube Basis"
+@if(IRRADIANCE_VOLUMES_ARE_USABLE)
 fn irradiance_volume_light(
     world_position: vec3<f32>,
     N: vec3<f32>,
@@ -31,17 +31,15 @@ fn irradiance_volume_light(
 
     // If we're lightmapped, and the irradiance volume contributes no diffuse
     // light, then bail out.
-@if(LIGHTMAP)
+    @if(LIGHTMAP)
     if (!query_result.affects_lightmapped_mesh_diffuse) {
         return vec3(0.0f);
     }
-// #endif  // LIGHTMAP
 
-@if(MULTIPLE_LIGHT_PROBES_IN_ARRAY)
+    @if(MULTIPLE_LIGHT_PROBES_IN_ARRAY)
     let irradiance_volume_texture = irradiance_volumes[query_result.texture_index];
-@else // #else
+    @else
     let irradiance_volume_texture = irradiance_volume;
-// #endif
 
     let atlas_resolution = vec3<f32>(textureDimensions(irradiance_volume_texture));
     let resolution = vec3<f32>(textureDimensions(irradiance_volume_texture) / vec3(1u, 2u, 3u));
@@ -67,5 +65,3 @@ fn irradiance_volume_light(
     let NN = N * N;
     return (rgb_x * NN.x + rgb_y * NN.y + rgb_z * NN.z) * query_result.intensity;
 };
-
-// #endif  // IRRADIANCE_VOLUMES_ARE_USABLE
