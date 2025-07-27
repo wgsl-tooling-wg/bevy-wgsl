@@ -24,7 +24,7 @@ fn main() {
             },
             ..Default::default()
         })
-        .compile("main")
+        .compile(&"package::main".parse().unwrap())
         .inspect_err(|e| {
             eprintln!("{e}");
             panic!();

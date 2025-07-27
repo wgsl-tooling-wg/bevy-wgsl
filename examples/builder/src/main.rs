@@ -1,7 +1,4 @@
-use std::{
-    path::{Path, PathBuf},
-    time::Instant,
-};
+use std::{path::Path, time::Instant};
 
 fn main() {
     println!("compiling package...");
