@@ -717,7 +717,7 @@ dependencies = [
 
 [[package]]
 name = "tokrepr"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -794,6 +794,7 @@ dependencies = [
  "thiserror",
  "wesl-macros",
  "wgsl-parse",
+ "wgsl-types",
 ]
 
 [[package]]
@@ -820,6 +821,19 @@ dependencies = [
  "lalrpop-util",
  "lexical",
  "logos",
+ "thiserror",
+ "tokrepr",
+ "wgsl-types",
+]
+
+[[package]]
+name = "wgsl-types"
+version = "0.2.0"
+dependencies = [
+ "derive_more",
+ "half",
+ "itertools",
+ "num-traits",
  "thiserror",
  "tokrepr",
 ]

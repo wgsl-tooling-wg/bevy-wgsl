@@ -27,7 +27,7 @@ fn main() {
     let duration = valid_end - pkg_end;
     println!("validation done in {} ms", duration.as_millis());
 
-    let file = pkg.codegen().expect("failed to build artifact");
+    let file = pkg.codegen();
 
     let codegen_end = Instant::now();
     let duration = codegen_end - pkg_end;
