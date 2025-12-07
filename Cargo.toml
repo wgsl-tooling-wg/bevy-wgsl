@@ -9,10 +9,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-wesl = { version = "0.2.0", features = ["naga-ext"] }
+wesl = { version = "0.3.0", features = ["naga-ext"] }
 
 [build-dependencies]
-wesl = { version = "0.2.0", features = ["package", "naga-ext", "eval"] }
+wesl = { version = "0.3.0", features = ["package", "naga-ext", "eval"] }
 
 [patch.crates-io]
 wesl = { path = "../wesl-rs/crates/wesl" }

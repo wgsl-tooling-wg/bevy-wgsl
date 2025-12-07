@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 bevy-wgsl = { version = "0.1.0", path = "../.." }
-wesl = { version = "0.2.0", features = ["naga-ext"] }
+wesl = { version = "0.3.0", features = ["naga-ext"] }

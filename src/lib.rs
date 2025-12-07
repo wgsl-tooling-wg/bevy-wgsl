@@ -1,3 +1,2 @@
-use wesl::wesl_pkg;
-wesl_pkg!(bevy);
+wesl::wesl_pkg!(bevy);
 pub use bevy::*;
